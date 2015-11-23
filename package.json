@@ -1,0 +1,7 @@
+{
+  "name": "ccwc-image-utils",
+  "version": "0.1.0",
+  "devDependencies": {
+    "ccwc-videocamera": "git://github.com/creativecode-webcomponents/ccwc-video.git"
+  }
+}
