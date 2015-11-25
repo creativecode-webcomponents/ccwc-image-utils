@@ -3,11 +3,11 @@
 <head lang="en">
     <meta charset="UTF-8">
     <title>Video Blob Detect</title>
-    <link rel="import" href="../node_modules/ccwc-videoplayer/ccwc-videoplayer.html">
+    <link rel="import" href="../node_modules/ccwc-video/ccwc-video.html">
     <script src="../imgutils.js"></script>
 
     <style>
-        ccwc-videoplayer {
+        ccwc-video {
             width: 640px;
             height: 480px;
         }
@@ -15,12 +15,12 @@
 </head>
 
 <!-- Sample to big to be in repo, download from: http://www.videezy.com/transportation/94-frogger-highway -->
-<ccwc-videoplayer
+<ccwc-video
         frameDataMode="imagedata"
         canvasRefreshInterval="100"
         src="./videos/FroggerHighway.mp4"
         useCanvasForDisplay>
-</ccwc-videoplayer>
+</ccwc-video>
 
 <br />
 <button onclick="capture(event)">Video Blob Detect</button>
@@ -32,12 +32,12 @@
     var baselineimage = null;
     var lastframe = null;
     var tolerance = parseInt(document.querySelector('#tolerance').value);
-    document.querySelector('ccwc-videoplayer').addEventListener('frameupdate', function(event) {
+    document.querySelector('ccwc-video').addEventListener('frameupdate', function(event) {
         var data = event.detail;
         lastframe = data.framedata;
         if (baselineimage) {
-            var diff = ImageUtils.toDiff(data.framedata, baselineimage, tolerance);
-            var blobs = ImageUtils.findBlobs((diff), {paint: true});
+            var diff = ccwc.ImageUtils.toDiff(data.framedata, baselineimage, tolerance);
+            var blobs = ccwc.ImageUtils.findBlobs((diff), {paint: true});
             data.canvascontext.putImageData(blobs.image, data.videoLeft, data.videoTop, 0, 0, data.videoWidth, data.videoHeight );
         }
     });

@@ -1,4 +1,54 @@
-var ImageUtils = {
+if (!window.ccwc) { ccwc = {}; }
+
+ccwc.ImageUtilsChain = function(pxs) {
+    this.result = pxs;
+
+    /**
+     * convert image to grayscale
+     * @param {ImageData} pxs
+     * @returns {*}
+     */
+    this.toGrayscale = function() {
+        this.result = ccwc.ImageUtils.toGrayscale(this.result);
+        return this;
+    };
+
+    /**
+     * saturate image
+     * @param {ImageData} pxs
+     * @param {Number} percentamount percentage saturation
+     * @returns {*}
+     */
+     this.saturate = function(percentamount) {
+         this.result = ccwc.ImageUtils.saturate(this.result, percentamount);
+         return this;
+     };
+
+    /**
+     * convert to pure black or pure white
+     * @param pxs
+     * @param pxs
+     * @returns {*}
+     */
+    this.toBlackAndWhite = function(thresholdtoblackpercent) {
+        this.result = ccwc.ImageUtils.toBlackAndWhite(this.result, thresholdtoblackpercent);
+        return this;
+    };
+
+    /**
+     * convert 2 images to an image highlighting differences
+     * @param pxs1
+     * @param pxs2
+     * @param tolerance
+     * @returns {*}
+     */
+    this.toDiff = function(compare, tolerance) {
+        this.result = ccwc.ImageUtils.toDiff(this.result, compare, tolerance);
+        return this;
+    }
+};
+
+ccwc.ImageUtils = {
     MIN_BLOB_SIZE: 50,
 
     /**
@@ -10,6 +60,23 @@ var ImageUtils = {
         for (var c = 0; c < pxs.data.length; c+=4) {
             var gray = (pxs.data[c] + pxs.data[c+1] + pxs.data[c+2])/3;
             pxs.data[c] = pxs.data[c+1] = pxs.data[c+2] = gray;
+        }
+        return pxs;
+    },
+
+    /**
+     * saturate image
+     * @param {ImageData} pxs
+     * @param {Number} percentamount percentage saturation
+     * @returns {*}
+     */
+    saturate: function(pxs, percentamount) {
+        if (!percentamount) { percentamount = 50; }
+        var amt = percentamount/100 * 255;
+        for (var c = 0; c < pxs.data.length; c+=4) {
+            pxs.data[c] = pxs.data[c] + amt;
+            pxs.data[c+1] = pxs.data[c+1] + amt;
+            pxs.data[c+2] = pxs.data[c+2] + amt;
         }
         return pxs;
     },
