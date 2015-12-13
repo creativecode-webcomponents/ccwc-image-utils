@@ -4,7 +4,9 @@
         <title>WebGL Greyscale Filter</title>
     </head>
     <body>
-        <script src="../webgfilter.js" type="text/javascript"></script>
+        <script src="../src/webgfilter.js" type="text/javascript"></script>
+        <script src="../build/shaders.js" type="text/javascript"></script>
+
         <script>
             var canvas = document.createElement('canvas');
             document.body.appendChild(canvas);
@@ -16,7 +18,7 @@
                 canvas.width = img.width;
                 var ctx = canvas.getContext('webgl');
                 var glfilter = new ccwc.WebGLFilter(ctx, img);
-                glfilter.useFilter(ccwc.WebGLFilter.filters.GREYSCALE);
+                glfilter.useFilter('greyscale');
             };
         </script>
     </body>
