@@ -4,7 +4,7 @@
         <title>WebGL Sobel Edge Detection Filter</title>
     </head>
     <body>
-        <script src="../src/webgfilter.js" type="text/javascript"></script>
+        <script src="../src/webglfilter.js" type="text/javascript"></script>
         <script src="../build/shaders.js" type="text/javascript"></script>
         <script>
             var canvas = document.createElement('canvas');
@@ -15,9 +15,10 @@
             img.onload = function(e) {
                 canvas.height = img.height;
                 canvas.width = img.width;
-                var ctx = canvas.getContext('webgl');
-                var glfilter = new ccwc.WebGLFilter(ctx, img);
-                glfilter.useFilter('sobel_edge_detection');
+                var glProps = ccwc.WebGLFilter.createRenderProps(
+                        canvas.getContext('webgl'), ccwc.WebGLFilter.createFilterFromName('sobel_edge_detection'), img
+                );
+                ccwc.WebGLFilter.render(glProps);
             };
         </script>
     </body>

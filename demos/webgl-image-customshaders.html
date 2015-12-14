@@ -60,7 +60,9 @@
     </script>
 </head>
 <body>
-<script src="../src/webgfilter.js" type="text/javascript"></script>
+<script src="../src/webglfilter.js" type="text/javascript"></script>
+<script src="../build/shaders.js" type="text/javascript"></script>
+
 <script>
     var canvas = document.createElement('canvas');
     document.body.appendChild(canvas);
@@ -70,9 +72,12 @@
     img.onload = function(e) {
         canvas.height = img.height;
         canvas.width = img.width;
-        var ctx = canvas.getContext('webgl');
-        var glfilter = new ccwc.WebGLFilter(ctx, img);
-        glfilter.useShaders(ccwc.WebGLFilter.shaders.NOFILTER_VERTEX, document.getElementById('2d-fragment-shader').text);
+        var glProps = ccwc.WebGLFilter.createRenderProps(
+                canvas.getContext('webgl'),
+                ccwc.WebGLFilter.createFilterFromShaders(ccwc.WebGLFilter.shaders.passthrough.vertex, document.getElementById('2d-fragment-shader').text),
+                img
+        );
+        ccwc.WebGLFilter.render(glProps);
     };
 </script>
 </body>

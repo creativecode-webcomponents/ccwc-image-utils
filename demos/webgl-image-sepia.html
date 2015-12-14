@@ -4,7 +4,7 @@
         <title>WebGL Sepia Tone Filter</title>
     </head>
     <body>
-        <script src="../src/webgfilter.js" type="text/javascript"></script>
+        <script src="../src/webglfilter.js" type="text/javascript"></script>
         <script src="../build/shaders.js" type="text/javascript"></script>
 
         <script>
@@ -16,9 +16,10 @@
             img.onload = function(e) {
                 canvas.height = img.height;
                 canvas.width = img.width;
-                var ctx = canvas.getContext('webgl');
-                var glfilter = new ccwc.WebGLFilter(ctx, img);
-                glfilter.useFilter('sepia');
+                var glProps = ccwc.WebGLFilter.createRenderProps(
+                        canvas.getContext('webgl'), ccwc.WebGLFilter.createFilterFromName('sepia'), img
+                );
+                ccwc.WebGLFilter.render(glProps);
             };
         </script>
     </body>
