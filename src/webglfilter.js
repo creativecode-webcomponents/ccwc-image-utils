@@ -33,7 +33,7 @@ ccwc.WebGLFilter = {
     createRenderProps: function(webglcontext, filter, texture, textureWidth, textureHeight) {
         var props = {};
         if (!webglcontext) {
-            var canvas = document.getElementById('c');
+            var canvas = document.createElement('canvas')
             props.gl = canvas.getContext('webgl');
         } else {
             props.gl = webglcontext;
@@ -53,6 +53,12 @@ ccwc.WebGLFilter = {
         } else {
             props.textureHeight = textureHeight;
         }
+
+        props.canvas2DHelper = document.createElement('canvas');
+        props.canvas2DHelper.width = props.textureWidth;
+        props.canvas2DHelper.height = props.textureHeight;
+        props.canvas2DHelperContext = props.canvas2DHelper.getContext('2d');
+
         return props;
     },
 
@@ -121,5 +127,23 @@ ccwc.WebGLFilter = {
         glprops.isInitialized = true;
 
         return glprops;
+    },
+
+    /**
+     * read pixels from GL context
+     * @param glProps
+     */
+    getCanvasPixels: function(glprops) {
+        var glctx = glprops.gl;
+        if (!glprops.pixelarray) {
+            glprops.pixelarray = new Uint8Array(glctx.canvas.width * glctx.canvas.height * 4);
+        }
+        glctx.pixelStorei(glctx.UNPACK_FLIP_Y_WEBGL, true);
+        glctx.readPixels(0, 0, glctx.canvas.width, glctx.canvas.height, glctx.RGBA, glctx.UNSIGNED_BYTE, glprops.pixelarray);
+        glctx.pixelStorei(glctx.UNPACK_FLIP_Y_WEBGL, false);
+        var imgData = glprops.canvas2DHelperContext.createImageData(glctx.canvas.width, glctx.canvas.height);
+        imgData.data.set(new Uint8ClampedArray(glprops.pixelarray));
+        return imgData;
     }
+
 };
