@@ -3,15 +3,13 @@
 <head>
     <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
     <title>Demo: Apply Filter</title>
-    <script src="../node_modules/webcomponents.js/webcomponents.min.js"></script>
-    <script src="../src/webglfilter.js"></script>
-    <script src="../build/shaders.js" type="text/javascript"></script>
+    <script src="../ccwc-image-utils-gpu.js"></script>
     <link rel="import" href="../node_modules/ccwc-video/ccwc-video.html">
 
     <style>
         ccwc-video {
-            width: 640px;
-            height: 480px;
+            width: 250px;
+            height: 250px;
         }
     </style>
 
@@ -21,11 +19,10 @@
 <body>
 <h2>Demo: Apply Filter</h2>
 <p>
-    Apply a filter to the user's camera
+    Apply a filter to the video
 </p>
 <ccwc-video
-        src="0"
-        useCamera
+        src="../node_modules/ccwc-video/demo/SampleVideo_360x240_1mb.mp4"
         canvasRefreshInterval="100">
 </ccwc-video>
 
@@ -41,15 +38,15 @@
         canvas.height = event.detail.videoHeight;
 
         var glctx = canvas.getContext('webgl');
-        var glProps = ccwc.WebGLFilter.createRenderProps(
+        var glProps = ccwc.image.utils.glfilter.createRenderProps(
                 canvas.getContext('webgl'),
-                ccwc.WebGLFilter.createFilterFromName(filters[parseInt(Math.random()*filters.length+1)]),
+                ccwc.image.utils.glfilter.createFilterFromName(filters[parseInt(Math.random()*filters.length +1)]),
                 document.querySelector('ccwc-video').videoElement,
                 canvas.width, canvas.height
         );
 
         document.querySelector('ccwc-video').addEventListener('frameupdate', function(event) {
-            glProps = ccwc.WebGLFilter.render(glProps);
+            glProps = ccwc.image.utils.glfilter.render(glProps);
         });
     });
 </script>

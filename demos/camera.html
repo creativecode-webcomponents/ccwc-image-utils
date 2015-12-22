@@ -3,11 +3,11 @@
 <head lang="en">
     <meta charset="UTF-8">
     <title>Video Camera Demo</title>
-    <link rel="import" href="../node_modules/ccwc-videocamera/ccwc-videocamera.html">
-    <script src="../src/imgutils.js"></script>
+    <link rel="import" href="../node_modules/ccwc-video/ccwc-video.html">
+    <script src="../ccwc-image-utils-cpu.js"></script>
     
     <style>
-        ccwc-videocamera {
+        ccwc-video {
             width: 640px;
             height: 480px;
         }
@@ -15,17 +15,18 @@
 </head>
 
 <body>
-    <ccwc-videocamera
+    <ccwc-video
             frameDataMode="imagedata"
             canvasRefreshInterval="50"
-            currentSource="1"
+            src="0"
+            useCamera
             useCanvasForDisplay>
-    </ccwc-videocamera>
+    </ccwc-video>
 
     <script>
-        document.querySelector('ccwc-videocamera').addEventListener('frameupdate', function(event) {
+        document.querySelector('ccwc-video').addEventListener('frameupdate', function(event) {
             var data = event.detail;
-            data.canvascontext.putImageData(ImageUtils.toGrayscale(data.framedata), 0, 0, 0, 0, data.width, data.height );
+            data.canvascontext.putImageData(ccwc.image.filters.toGrayscale(data.framedata), 0, 0, 0, 0, data.width, data.height );
         });
     </script>
 </body>

@@ -4,23 +4,21 @@
         <title>WebGL Greyscale Filter</title>
     </head>
     <body>
-        <script src="../src/webglfilter.js" type="text/javascript"></script>
-        <script src="../build/shaders.js" type="text/javascript"></script>
+    <script src="../ccwc-image-utils-gpu.js" type="text/javascript"></script>
+    <script>
+        var canvas = document.createElement('canvas');
+        document.body.appendChild(canvas);
 
-        <script>
-            var canvas = document.createElement('canvas');
-            document.body.appendChild(canvas);
-
-            var img = new Image();
-            img.src = 'images/food.jpg';
-            img.onload = function(e) {
-                canvas.height = img.height;
-                canvas.width = img.width;
-                var glProps = ccwc.WebGLFilter.createRenderProps(
-                        canvas.getContext('webgl'), ccwc.WebGLFilter.createFilterFromName('greyscale'), img
-                );
-                ccwc.WebGLFilter.render(glProps);
-            };
-        </script>
+        var img = new Image();
+        img.src = 'images/food.jpg';
+        img.onload = function(e) {
+            canvas.height = img.height;
+            canvas.width = img.width;
+            var glProps = ccwc.image.utils.glfilter.createRenderProps(
+                    canvas.getContext('webgl'), ccwc.image.utils.glfilter.createFilterFromName('greyscale'), img, img.width, img.height
+            );
+            ccwc.image.utils.glfilter.render(glProps);
+        };
+    </script>
     </body>
 </html>

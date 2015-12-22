@@ -5,7 +5,7 @@
     <title>Image to Grayscale</title>
 </head>
 <body>
-    <script src="../src/imgutils.js" type="text/javascript"></script>
+    <script src="../ccwc-image-utils-cpu.js" type="text/javascript"></script>
     <script>
         var canvas = document.createElement('canvas');
         var ctx = canvas.getContext('2d');
@@ -20,7 +20,7 @@
             var starttime = new Date().getTime();
             ctx.drawImage(img, 0, 0, this.naturalWidth, this.naturalHeight);
             var imgPixels = ctx.getImageData(0, 0, this.naturalWidth, this.naturalHeight);
-            ctx.putImageData( ImageUtils.toGrayscale(imgPixels), 0, 0, 0, 0, this.naturalWidth, this.naturalHeight );
+            ctx.putImageData( ccwc.image.filters.toGrayscale(imgPixels), 0, 0, 0, 0, this.naturalWidth, this.naturalHeight );
             var endtime = new Date().getTime();
             console.log((endtime-starttime)/1000 + ' seconds');
         };

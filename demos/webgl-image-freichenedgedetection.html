@@ -4,8 +4,7 @@
         <title>WebGL Frei Chen Edge Detection Filter</title>
     </head>
     <body>
-        <script src="../src/webglfilter.js" type="text/javascript"></script>
-        <script src="../build/shaders.js" type="text/javascript"></script>
+        <script src="../ccwc-image-utils-gpu.js" type="text/javascript"></script>
         <script>
             var canvas = document.createElement('canvas');
             document.body.appendChild(canvas);
@@ -15,10 +14,10 @@
             img.onload = function(e) {
                 canvas.height = img.height;
                 canvas.width = img.width;
-                var glProps = ccwc.WebGLFilter.createRenderProps(
-                        canvas.getContext('webgl'), ccwc.WebGLFilter.createFilterFromName('freichen_edge_detection'), img
+                var glProps = ccwc.image.utils.glfilter.createRenderProps(
+                        canvas.getContext('webgl'), ccwc.image.utils.glfilter.createFilterFromName('freichen_edge_detection'), img, img.width, img.height
                 );
-                ccwc.WebGLFilter.render(glProps);
+                ccwc.image.utils.glfilter.render(glProps);
             };
         </script>
     </body>

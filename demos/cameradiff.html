@@ -3,23 +3,24 @@
 <head lang="en">
     <meta charset="UTF-8">
     <title>Video Camera Demo</title>
-    <link rel="import" href="../node_modules/ccwc-videocamera/ccwc-videocamera.html">
-    <script src="../src/imgutils.js"></script>
+    <link rel="import" href="../node_modules/ccwc-video/ccwc-video.html">
+    <script src="../ccwc-image-utils-cpu.js"></script>
 
     <style>
-        ccwc-videocamera {
+        ccwc-video {
             width: 640px;
             height: 480px;
         }
     </style>
 </head>
 
-<ccwc-videocamera
+<ccwc-video
         frameDataMode="imagedata"
         canvasRefreshInterval="50"
-        currentSource="1"
+        src="0"
+        useCamera
         useCanvasForDisplay>
-</ccwc-videocamera>
+</ccwc-video>
 
 <br />
 <button onclick="capture(event)">Capture Baseline</button>
@@ -31,11 +32,11 @@
     var baselineimage = null;
     var lastframe = null;
     var tolerance = parseInt(document.querySelector('#tolerance').value);
-    document.querySelector('ccwc-videocamera').addEventListener('frameupdate', function(event) {
+    document.querySelector('ccwc-video').addEventListener('frameupdate', function(event) {
         var data = event.detail;
         lastframe = data.framedata;
         if (baselineimage) {
-            data.canvascontext.putImageData(ImageUtils.toDiff(data.framedata, baselineimage, tolerance), 0, 0, 0, 0, data.width, data.height );
+            data.canvascontext.putImageData(ccwc.image.filters.toDiff(data.framedata, baselineimage, tolerance), 0, 0, 0, 0, data.width, data.height );
         }
     });
 

@@ -60,8 +60,7 @@
     </script>
 </head>
 <body>
-<script src="../src/webglfilter.js" type="text/javascript"></script>
-<script src="../build/shaders.js" type="text/javascript"></script>
+<script src="../ccwc-image-utils-gpu.js" type="text/javascript"></script>
 
 <script>
     var canvas = document.createElement('canvas');
@@ -72,12 +71,13 @@
     img.onload = function(e) {
         canvas.height = img.height;
         canvas.width = img.width;
-        var glProps = ccwc.WebGLFilter.createRenderProps(
+        var glProps = ccwc.image.utils.glfilter.createRenderProps(
                 canvas.getContext('webgl'),
-                ccwc.WebGLFilter.createFilterFromShaders(ccwc.WebGLFilter.shaders.passthrough.vertex, document.getElementById('2d-fragment-shader').text),
-                img
+                ccwc.image.utils.glfilter.createFilterFromShaders(
+                        ccwc.image.glshaders.passthrough.vertex,
+                        document.getElementById('2d-fragment-shader').text), img, img.width, img.height
         );
-        ccwc.WebGLFilter.render(glProps);
+        ccwc.image.utils.glfilter.render(glProps);
     };
 </script>
 </body>
