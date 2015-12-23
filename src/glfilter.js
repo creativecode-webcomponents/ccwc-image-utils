@@ -48,6 +48,7 @@ ccwc.image.utils.glfilter = {
         props.textures = textures;
         props.glTextures = [];
         props.glTextureIndices = [];
+        props.flipTexture = false;
 
         for (var c = 0; c < props.textures.length; c++) {
             props.glTextureIndices.push(c);
@@ -120,6 +121,7 @@ ccwc.image.utils.glfilter = {
                 glctx.texParameteri(glctx.TEXTURE_2D, glctx.TEXTURE_WRAP_T, glctx.CLAMP_TO_EDGE);
                 glctx.texParameteri(glctx.TEXTURE_2D, glctx.TEXTURE_MIN_FILTER, glctx.NEAREST);
                 glctx.texParameteri(glctx.TEXTURE_2D, glctx.TEXTURE_MAG_FILTER, glctx.NEAREST);
+                glctx.pixelStorei(glctx.UNPACK_FLIP_Y_WEBGL, glprops.flipTexture);
                 glctx.texImage2D(glctx.TEXTURE_2D, 0, glctx.RGBA, glctx.RGBA, glctx.UNSIGNED_BYTE, glprops.textures[refreshTextureIndices[c]]);
 
                 var resolutionLocationVertex = glctx.getUniformLocation(program, 'u_resolution');
@@ -152,9 +154,7 @@ ccwc.image.utils.glfilter = {
         if (!glprops.pixelarray) {
             glprops.pixelarray = new Uint8Array(glctx.canvas.width * glctx.canvas.height * 4);
         }
-        glctx.pixelStorei(glctx.UNPACK_FLIP_Y_WEBGL, true);
         glctx.readPixels(0, 0, glctx.canvas.width, glctx.canvas.height, glctx.RGBA, glctx.UNSIGNED_BYTE, glprops.pixelarray);
-        glctx.pixelStorei(glctx.UNPACK_FLIP_Y_WEBGL, false);
         var imgData = glprops.canvas2DHelperContext.createImageData(glctx.canvas.width, glctx.canvas.height);
         imgData.data.set(new Uint8ClampedArray(glprops.pixelarray));
         return imgData;
