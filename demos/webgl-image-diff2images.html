@@ -1,0 +1,65 @@
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title>WebGL Highlight Difference Between 2 Images</title>
+
+    <script id="2d-fragment-shader" type="x-shader/x-fragment">
+            precision mediump float;
+            uniform sampler2D u_image0;
+            uniform sampler2D u_image1;
+            uniform float u_tolerance;
+            varying vec2 v_texCoord;
+
+            void main() {
+               vec4 color0 = texture2D(u_image0, v_texCoord);
+               vec4 color1 = texture2D(u_image1, v_texCoord);
+               float avg0 = (color0[0] + color0[1] + color0[2])/3.0;
+               float avg1 = (color1[0] + color1[1] + color1[2])/3.0;
+
+               if (abs(avg1 - avg0) < u_tolerance) {
+                    gl_FragColor = vec4(0.0, 0.0, 0.0, 255.0);
+               } else {
+                    gl_FragColor = vec4(255.0, 255.0, 255.0, 255.0);
+               }
+            }
+        </script>
+
+    <script src="../ccwc-image-utils-webgl.js" type="text/javascript"></script>
+</head>
+<body>
+<p>
+    WebGL Highlight Difference Between 2 Images with difference tolerance slider
+</p>
+<input type="range" value="10" min="0" max="100" step="1" id="tolerance" oninput="onSliderChange(event)">
+<script>
+    var canvas = document.createElement('canvas');
+    var glProps;
+    document.body.appendChild(canvas);
+
+    var img = new Image();
+    img.src = 'images/highway1.jpg';
+    img.onload = function(e) {
+        var img2 = new Image();
+        img2.src = 'images/highway2.jpg';
+        img2.onload = function (e) {
+            canvas.height = img.height;
+            canvas.width = img.width;
+            glProps = ccwc.image.webgl.filter.createRenderProps(
+                    canvas.getContext('webgl'),
+                    ccwc.image.webgl.filter.createFilterFromShaders(
+                            ccwc.image.webgl.shaders.passthrough.vertex,
+                            document.getElementById('2d-fragment-shader').text), [img, img2], img.width, img.height
+            );
+
+            glProps.uniforms.add('u_tolerance', ccwc.image.webgl.uniforms.UNIFORM1f, [0.1]);
+            ccwc.image.webgl.filter.render(glProps);
+        }
+    };
+
+    function onSliderChange(event) {
+        glProps.uniforms.update('u_tolerance', [ event.target.value/100]);
+        ccwc.image.webgl.filter.render(glProps);
+    }
+</script>
+</body>
+</html>
