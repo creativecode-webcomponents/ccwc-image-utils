@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <title>Video Blob Detect</title>
     <link rel="import" href="../node_modules/ccwc-video/ccwc-video.html">
-    <script src="../ccwc-image-utils-cpu.js"></script>
+    <script src="../ccwc-image-utils-canvas.js"></script>
 
     <style>
         ccwc-video {
@@ -36,8 +36,8 @@
         var data = event.detail;
         lastframe = data.framedata;
         if (baselineimage) {
-            var diff = ccwc.image.filters.toDiff(data.framedata, baselineimage, tolerance);
-            var blobs = ccwc.image.utils.findBlobs((diff), {paint: true});
+            var diff = ccwc.image.canvas.filters.toDiff(data.framedata, baselineimage, tolerance);
+            var blobs = ccwc.image.canvas.findBlobs((diff), {paint: true});
             data.canvascontext.putImageData(blobs.image, 0, 0, 0, 0, data.videoWidth, data.videoHeight );
         }
     });

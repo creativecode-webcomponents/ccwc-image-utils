@@ -1,8 +1,93 @@
 if (!window.ccwc) { ccwc = {}; }
 if (!window.ccwc.image) { ccwc.image = {}; }
-if (!window.ccwc.image.utils) { ccwc.image.utils = {}; }
+if (!window.ccwc.image.canvas) { ccwc.image.canvas= {}; }
+if (!window.ccwc.image.canvas.filters) { ccwc.image.canvas.filters = {}; }
 
-ccwc.image.utils.MIN_BLOB_SIZE = 50;
+/**
+ * convert image to grayscale
+ * @param {ImageData} pxs
+ * @returns {*}
+ */
+ccwc.image.canvas.filters.toGrayscale = function(pxs) {
+    for (var c = 0; c < pxs.data.length; c+=4) {
+        var gray = (pxs.data[c] + pxs.data[c+1] + pxs.data[c+2])/3;
+        pxs.data[c] = pxs.data[c+1] = pxs.data[c+2] = gray;
+    }
+    return pxs;
+};
+
+/**
+ * saturate image
+ * @param {ImageData} pxs
+ * @param {Number} percentamount percentage saturation
+ * @returns {*}
+ */
+ccwc.image.canvas.filters.saturate = function(pxs, percentamount) {
+    if (!percentamount) { percentamount = 50; }
+    var amt = percentamount/100 * 255;
+    for (var c = 0; c < pxs.data.length; c+=4) {
+        pxs.data[c] = pxs.data[c] + amt;
+        pxs.data[c+1] = pxs.data[c+1] + amt;
+        pxs.data[c+2] = pxs.data[c+2] + amt;
+    }
+    return pxs;
+};
+
+/**
+ * convert 2 images to an image highlighting differences
+ * @param pxs1
+ * @param pxs2
+ * @param tolerance
+ * @returns {*}
+ */
+ccwc.image.canvas.filters.toDiff = function(pxs1, pxs2, tolerance) {
+    if (pxs1.data.length !== pxs2.data.length) { throw new Error('images not the same size'); }
+    var diff = new ImageData(pxs1.width, pxs1.height);
+    for (var c = 0; c < pxs1.data.length; c+=4) {
+        var draw = 255;
+        for (var d = 0; d < 4; d++) {
+            if (pxs1.data[c+d] - pxs2.data[c+d] > tolerance) {
+                draw = 0;
+                continue;
+            }
+        }
+
+        diff.data[c] = draw;
+        diff.data[c+1] = draw;
+        diff.data[c+2] = draw;
+        diff.data[c+3]= 255;
+    }
+    return diff;
+};
+
+/**
+ * convert to pure black or pure white
+ * @param pxs
+ * @param pxs
+ * @returns {*}
+ */
+ccwc.image.canvas.filters.toBlackAndWhite = function(pxs, thresholdtoblackpercent) {
+    if (!thresholdtoblackpercent) { thresholdtoblackpercent = 50; }
+    var threshold = thresholdtoblackpercent/100 * (255 + 255 + 255);
+    for (var c = 0; c < pxs.data.length; c+=4) {
+        if (pxs.data[c] + pxs.data[c+1] + pxs.data[c+2] < threshold ) {
+            pxs.data[c] = 0;
+            pxs.data[c+1] = 0;
+            pxs.data[c+2] = 0;
+        } else {
+            pxs.data[c] = 255;
+            pxs.data[c+1] = 255;
+            pxs.data[c+2] = 255;
+        }
+    }
+
+    return pxs;
+};
+if (!window.ccwc) { ccwc = {}; }
+if (!window.ccwc.image) { ccwc.image = {}; }
+if (!window.ccwc.image.canvas) { ccwc.image.canvas= {}; }
+
+ccwc.image.canvas.MIN_BLOB_SIZE = 50;
 
 /**
  * find blobs
@@ -10,7 +95,7 @@ ccwc.image.utils.MIN_BLOB_SIZE = 50;
  * @param pxs
  * @return {Array} blob coordinates
  */
-ccwc.image.utils.findBlobs = function (pxs, cfg) {
+ccwc.image.canvas.findBlobs = function (pxs, cfg) {
     if (!cfg) {
         cfg = {};
     }
@@ -154,7 +239,7 @@ ccwc.image.utils.findBlobs = function (pxs, cfg) {
     return {image: pxs, blobs: blobCoords};
 };
 
-ccwc.image.utils.filterchain = function(pxs) {
+ccwc.image.canvas.FilterChain = function(pxs) {
     this.result = pxs;
 
     /**
@@ -163,7 +248,7 @@ ccwc.image.utils.filterchain = function(pxs) {
      * @returns {*}
      */
     this.toGrayscale = function() {
-        this.result = ccwc.image.filters.toGrayscale(this.result);
+        this.result = ccwc.image.canvas.filters.toGrayscale(this.result);
         return this;
     };
 
@@ -174,7 +259,7 @@ ccwc.image.utils.filterchain = function(pxs) {
      * @returns {*}
      */
     this.saturate = function(percentamount) {
-        this.result = ccwc.image.filters.saturate(this.result, percentamount);
+        this.result = ccwc.image.canvas.filters.saturate(this.result, percentamount);
         return this;
     };
 
@@ -185,7 +270,7 @@ ccwc.image.utils.filterchain = function(pxs) {
      * @returns {*}
      */
     this.toBlackAndWhite = function(thresholdtoblackpercent) {
-        this.result = ccwc.image.filters.toBlackAndWhite(this.result, thresholdtoblackpercent);
+        this.result = ccwc.image.canvas.filters.toBlackAndWhite(this.result, thresholdtoblackpercent);
         return this;
     };
 
@@ -197,7 +282,7 @@ ccwc.image.utils.filterchain = function(pxs) {
      * @returns {*}
      */
     this.toDiff = function(compare, tolerance) {
-        this.result = ccwc.image.filters.toDiff(this.result, compare, tolerance);
+        this.result = ccwc.image.canvas.filters.toDiff(this.result, compare, tolerance);
         return this;
     }
 };

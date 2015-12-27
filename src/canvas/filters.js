@@ -1,13 +1,14 @@
 if (!window.ccwc) { ccwc = {}; }
 if (!window.ccwc.image) { ccwc.image = {}; }
-if (!window.ccwc.image.filters) { ccwc.image.filters = {}; }
+if (!window.ccwc.image.canvas) { ccwc.image.canvas= {}; }
+if (!window.ccwc.image.canvas.filters) { ccwc.image.canvas.filters = {}; }
 
 /**
  * convert image to grayscale
  * @param {ImageData} pxs
  * @returns {*}
  */
-ccwc.image.filters.toGrayscale = function(pxs) {
+ccwc.image.canvas.filters.toGrayscale = function(pxs) {
     for (var c = 0; c < pxs.data.length; c+=4) {
         var gray = (pxs.data[c] + pxs.data[c+1] + pxs.data[c+2])/3;
         pxs.data[c] = pxs.data[c+1] = pxs.data[c+2] = gray;
@@ -21,7 +22,7 @@ ccwc.image.filters.toGrayscale = function(pxs) {
  * @param {Number} percentamount percentage saturation
  * @returns {*}
  */
-ccwc.image.filters.saturate = function(pxs, percentamount) {
+ccwc.image.canvas.filters.saturate = function(pxs, percentamount) {
     if (!percentamount) { percentamount = 50; }
     var amt = percentamount/100 * 255;
     for (var c = 0; c < pxs.data.length; c+=4) {
@@ -39,7 +40,7 @@ ccwc.image.filters.saturate = function(pxs, percentamount) {
  * @param tolerance
  * @returns {*}
  */
-ccwc.image.filters.toDiff = function(pxs1, pxs2, tolerance) {
+ccwc.image.canvas.filters.toDiff = function(pxs1, pxs2, tolerance) {
     if (pxs1.data.length !== pxs2.data.length) { throw new Error('images not the same size'); }
     var diff = new ImageData(pxs1.width, pxs1.height);
     for (var c = 0; c < pxs1.data.length; c+=4) {
@@ -65,7 +66,7 @@ ccwc.image.filters.toDiff = function(pxs1, pxs2, tolerance) {
  * @param pxs
  * @returns {*}
  */
-ccwc.image.filters.toBlackAndWhite = function(pxs, thresholdtoblackpercent) {
+ccwc.image.canvas.filters.toBlackAndWhite = function(pxs, thresholdtoblackpercent) {
     if (!thresholdtoblackpercent) { thresholdtoblackpercent = 50; }
     var threshold = thresholdtoblackpercent/100 * (255 + 255 + 255);
     for (var c = 0; c < pxs.data.length; c+=4) {

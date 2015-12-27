@@ -1,8 +1,8 @@
 {
   "name": "ccwc-image-utils",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "devDependencies": {
-    "ccwc-videocamera": "git://github.com/creativecode-webcomponents/ccwc-video.git",
+    "ccwc-video": "git://github.com/creativecode-webcomponents/ccwc-video.git",
     "gulp": "^3.9.0",
     "gulp-concat": "^2.6.0",
     "gulp-gl2js": "git://github.com/bengfarrell/gulp-gl2js.git",

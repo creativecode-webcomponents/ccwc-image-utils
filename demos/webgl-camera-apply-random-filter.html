@@ -3,7 +3,7 @@
 <head>
     <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
     <title>Demo: Apply Filter</title>
-    <script src="../ccwc-image-utils-gpu.js"></script>
+    <script src="../ccwc-image-utils-webgl.js"></script>
     <link rel="import" href="../node_modules/ccwc-video/ccwc-video.html">
 
     <style>
@@ -39,15 +39,15 @@
         canvas.height = event.detail.videoHeight;
 
         var glctx = canvas.getContext('webgl');
-        var glProps = ccwc.image.utils.glfilter.createRenderProps(
+        var glProps = ccwc.image.webgl.filter.createRenderProps(
                 canvas.getContext('webgl'),
-                ccwc.image.utils.glfilter.createFilterFromName(filters[parseInt(Math.random()*filters.length+1)]),
+                ccwc.image.webgl.filter.createFilterFromName(filters[parseInt(Math.random()*filters.length+1)]),
                 document.querySelector('ccwc-video').videoElement,
                 canvas.width, canvas.height
         );
 
         document.querySelector('ccwc-video').addEventListener('frameupdate', function(event) {
-            glProps = ccwc.image.utils.glfilter.render(glProps);
+            glProps = ccwc.image.webgl.filter.render(glProps);
         });
     });
 </script>
