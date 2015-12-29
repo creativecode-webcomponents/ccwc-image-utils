@@ -1,5 +1,5 @@
 precision mediump float;
-uniform sampler2D u_image;
+uniform sampler2D u_image0;
 varying vec2 v_texCoord;
 uniform vec2 f_resolution;
 vec2 texel = vec2(1.0 / f_resolution.x, 1.0 / f_resolution.y);
@@ -33,7 +33,7 @@ void main(void) {
 
     for (float i=0.0; i<3.0; i++) {
         for (float j=0.0; j<3.0; j++) {
-            sampl = texture2D(u_image, v_texCoord + texel * vec2(i-1.0,j-1.0) ).rgb;
+            sampl = texture2D(u_image0, v_texCoord + texel * vec2(i-1.0,j-1.0) ).rgb;
             I[int(i)][int(j)] = length(sampl);
         }
     }
@@ -46,5 +46,5 @@ void main(void) {
     float M = (cnv[0] + cnv[1]) + (cnv[2] + cnv[3]);
     float S = (cnv[4] + cnv[5]) + (cnv[6] + cnv[7]) + (cnv[8] + M);
 
-    gl_FragColor = vec4(vec3(sqrt(M/S)), texture2D( u_image, v_texCoord ).a );
+    gl_FragColor = vec4(vec3(sqrt(M/S)), texture2D( u_image0, v_texCoord ).a );
 }

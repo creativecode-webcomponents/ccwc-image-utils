@@ -37,15 +37,15 @@
         canvas.width = event.detail.videoWidth;
         canvas.height = event.detail.videoHeight;
 
-        var glctx = canvas.getContext('webgl');
-        var glProps = ccwc.image.webgl.filter.createRenderProps(
-                canvas.getContext('webgl'),
-                ccwc.image.webgl.filter.createFilterFromName(filters[parseInt(Math.random()*filters.length +1)]),
-                document.querySelector('ccwc-video').videoElement,
-                canvas.width, canvas.height
-        );
+        var glProps = ccwc.image.webgl.filter.createRenderObject({
+            gl: canvas.getContext('webgl'),
+            filter: ccwc.image.webgl.filter.createFilterFromName(filters[parseInt(Math.random() * filters.length + 1)]),
+            textures: [{name: 'video', texture: document.querySelector('ccwc-video').videoElement}]
+        });
+
 
         document.querySelector('ccwc-video').addEventListener('frameupdate', function(event) {
+            glProps.textures.update('video');
             glProps = ccwc.image.webgl.filter.render(glProps);
         });
     });

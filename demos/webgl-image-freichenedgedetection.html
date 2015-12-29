@@ -11,13 +11,15 @@
 
             var img = new Image();
             img.src = 'images/food.jpg';
-            img.onload = function(e) {
+            img.onload = function() {
                 canvas.height = img.height;
                 canvas.width = img.width;
-                var glProps = ccwc.image.webgl.filter.createRenderProps(
-                        canvas.getContext('webgl'), ccwc.image.webgl.filter.createFilterFromName('freichen_edge_detection'), img, img.width, img.height
-                );
-                ccwc.image.webgl.filter.render(glProps);
+                var glProps = ccwc.image.webgl.filter.createRenderObject({
+                    filter: ccwc.image.webgl.filter.createFilterFromName('freichen_edge_detection'),
+                    gl: canvas.getContext('webgl'),
+                    textures: [{name: 'image', texture: img}],
+                    autorender: true
+                });
             };
         </script>
     </body>

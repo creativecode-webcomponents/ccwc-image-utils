@@ -44,15 +44,13 @@
         img2.onload = function (e) {
             canvas.height = img.height;
             canvas.width = img.width;
-            glProps = ccwc.image.webgl.filter.createRenderProps(
-                    canvas.getContext('webgl'),
-                    ccwc.image.webgl.filter.createFilterFromShaders(
-                            ccwc.image.webgl.shaders.passthrough.vertex,
-                            document.getElementById('2d-fragment-shader').text), [img, img2], img.width, img.height
-            );
-
-            glProps.uniforms.add('u_tolerance', ccwc.image.webgl.uniforms.UNIFORM1f, [0.1]);
-            ccwc.image.webgl.filter.render(glProps);
+            glProps = ccwc.image.webgl.filter.createRenderObject({
+                gl: canvas.getContext('webgl'),
+                filter: ccwc.image.webgl.filter.createFilterFromShaders(ccwc.image.webgl.shaders.passthrough.vertex, document.getElementById('2d-fragment-shader').text),
+                textures: [{name: 'imagea', texture: img}, {name: 'imageb', texture: img2}],
+                uniforms: [{name: 'u_tolerance', type: ccwc.image.webgl.uniforms.UNIFORM1f, values: [0.1]}],
+                autorender: true
+            });
         }
     };
 
