@@ -38,21 +38,28 @@ ccwc.image.webgl.filter = {
      */
     createRenderObject: function(params) {
         var props = {};
+
         props.gl = params.gl;
+        props.width = props.gl.canvas.width;
+        props.height = props.gl.canvas.height;
+
+        if (params.width) { props.width = params.width; }
+        if (params.height) { props.height = params.height; }
+
         props.filter = params.filter;
-        props.textures = new ccwc.image.webgl.textures(props.gl.canvas.width,props.gl.canvas.height);
+        props.textures = new ccwc.image.webgl.textures(props.width,props.height);
 
         props.canvas2DHelper = document.createElement('canvas');
-        props.canvas2DHelper.width = props.gl.canvas.width;
-        props.canvas2DHelper.height = props.gl.canvas.height;
+        props.canvas2DHelper.width = props.width;
+        props.canvas2DHelper.height = props.height;
         props.canvas2DHelperContext = props.canvas2DHelper.getContext('2d');
 
         props.uniforms = new ccwc.image.webgl.uniforms();
-        props.textures = new ccwc.image.webgl.textures(props.gl, props.gl.canvas.width, props.gl.canvas.height);
+        props.textures = new ccwc.image.webgl.textures(props.gl, props.width, props.height);
 
         if (params.textures) {
             for (var c = 0; c < params.textures.length; c++) {
-                props.textures.add(params.textures[c].name, params.textures[c].texture, params.textures[c].index );
+                props.textures.add(params.textures[c].name, params.textures[c].texture, params.textures[c].index, params.textures[c].pixelStore);
             }
         }
 

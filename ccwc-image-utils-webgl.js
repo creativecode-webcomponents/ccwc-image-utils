@@ -38,21 +38,28 @@ ccwc.image.webgl.filter = {
      */
     createRenderObject: function(params) {
         var props = {};
+
         props.gl = params.gl;
+        props.width = props.gl.canvas.width;
+        props.height = props.gl.canvas.height;
+
+        if (params.width) { props.width = params.width; }
+        if (params.height) { props.height = params.height; }
+
         props.filter = params.filter;
-        props.textures = new ccwc.image.webgl.textures(props.gl.canvas.width,props.gl.canvas.height);
+        props.textures = new ccwc.image.webgl.textures(props.width,props.height);
 
         props.canvas2DHelper = document.createElement('canvas');
-        props.canvas2DHelper.width = props.gl.canvas.width;
-        props.canvas2DHelper.height = props.gl.canvas.height;
+        props.canvas2DHelper.width = props.width;
+        props.canvas2DHelper.height = props.height;
         props.canvas2DHelperContext = props.canvas2DHelper.getContext('2d');
 
         props.uniforms = new ccwc.image.webgl.uniforms();
-        props.textures = new ccwc.image.webgl.textures(props.gl, props.gl.canvas.width, props.gl.canvas.height);
+        props.textures = new ccwc.image.webgl.textures(props.gl, props.width, props.height);
 
         if (params.textures) {
             for (var c = 0; c < params.textures.length; c++) {
-                props.textures.add(params.textures[c].name, params.textures[c].texture, params.textures[c].index );
+                props.textures.add(params.textures[c].name, params.textures[c].texture, params.textures[c].index, params.textures[c].pixelStore);
             }
         }
 
@@ -191,16 +198,21 @@ ccwc.image.webgl.textures = function(gl, width, height) {
 
     /**
      * add a texture
-     * @param name
-     * @param texture
-     * @param glindex
+     * @param {String} name
+     * @param {Object} texture
+     * @param {Integer} glindex
+     * @param {Array} pixelstore
      */
-    this.add = function(name, texture, glindex) {
+    this.add = function(name, texture, glindex, pixelstore) {
         if (!glindex) {
             glindex = 0;
             while (this.textureIndices.indexOf(glindex) !== -1) {
                 glindex ++;
             }
+        }
+
+        if (!pixelstore) {
+            pixelstore = [];
         }
         this.textureIndices.push(glindex);
 
@@ -210,7 +222,7 @@ ccwc.image.webgl.textures = function(gl, width, height) {
             texture: texture,
             gltexture: gl.createTexture(),
             initialized: false,
-            pixelStore: [], //[{ property: gl.UNPACK_FLIP_Y_WEBGL, value: true }],
+            pixelStore: pixelstore,
             dirty: true };
 
         this._unitialized.push(this._textures[name]);
@@ -259,7 +271,7 @@ ccwc.image.webgl.textures = function(gl, width, height) {
             gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
 
             for (var d = 0; d < this._unitialized[c].pixelStore.length; d++) {
-                gl.pixelStorei(this._unitialized[c].pixelStore[d].property, this._unitialized[c].pixelStore[d].value);
+                gl.pixelStorei(gl[this._unitialized[c].pixelStore[d].property], this._unitialized[c].pixelStore[d].value);
             }
 
             gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, this._unitialized[c].texture);

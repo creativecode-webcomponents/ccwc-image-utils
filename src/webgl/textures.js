@@ -28,16 +28,21 @@ ccwc.image.webgl.textures = function(gl, width, height) {
 
     /**
      * add a texture
-     * @param name
-     * @param texture
-     * @param glindex
+     * @param {String} name
+     * @param {Object} texture
+     * @param {Integer} glindex
+     * @param {Array} pixelstore
      */
-    this.add = function(name, texture, glindex) {
+    this.add = function(name, texture, glindex, pixelstore) {
         if (!glindex) {
             glindex = 0;
             while (this.textureIndices.indexOf(glindex) !== -1) {
                 glindex ++;
             }
+        }
+
+        if (!pixelstore) {
+            pixelstore = [];
         }
         this.textureIndices.push(glindex);
 
@@ -47,7 +52,7 @@ ccwc.image.webgl.textures = function(gl, width, height) {
             texture: texture,
             gltexture: gl.createTexture(),
             initialized: false,
-            pixelStore: [], //[{ property: gl.UNPACK_FLIP_Y_WEBGL, value: true }],
+            pixelStore: pixelstore,
             dirty: true };
 
         this._unitialized.push(this._textures[name]);
@@ -96,7 +101,7 @@ ccwc.image.webgl.textures = function(gl, width, height) {
             gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
 
             for (var d = 0; d < this._unitialized[c].pixelStore.length; d++) {
-                gl.pixelStorei(this._unitialized[c].pixelStore[d].property, this._unitialized[c].pixelStore[d].value);
+                gl.pixelStorei(gl[this._unitialized[c].pixelStore[d].property], this._unitialized[c].pixelStore[d].value);
             }
 
             gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, this._unitialized[c].texture);
