@@ -1,0 +1,59 @@
+<!doctype html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
+    <title>Demo: Take a snapshot and diff the Camera feed against it</title>
+    <script src="../ccwc-image-utils-webgl.js"></script>
+    <link rel="import" href="../node_modules/ccwc-video/ccwc-glvideo.html">
+
+    <script id="2d-fragment-shader" type="x-shader/x-fragment">
+            precision mediump float;
+            uniform sampler2D u_image0;
+            uniform sampler2D u_image1;
+            uniform float u_tolerance;
+            varying vec2 v_texCoord;
+
+            void main() {
+               vec4 color0 = texture2D(u_image0, v_texCoord);
+               vec4 color1 = texture2D(u_image1, v_texCoord);
+               float avg0 = (color0[0] + color0[1] + color0[2])/3.0;
+               float avg1 = (color1[0] + color1[1] + color1[2])/3.0;
+
+               if (abs(avg1 - avg0) < u_tolerance) {
+                    gl_FragColor = vec4(0.0, 0.0, 0.0, 255.0);
+               } else {
+                    gl_FragColor = vec4(255.0, 255.0, 255.0, 255.0);
+               }
+            }
+    </script>
+
+    <style>
+        ccwc-video {
+            width: 640px;
+            height: 480px;
+        }
+    </style>
+
+
+</head>
+
+<body>
+<h2>Demo: Take a snapshot and diff the Camera feed against it</h2>
+
+<ccwc-video
+        src="0"
+        useCamera
+        glFilter="diff"
+        canvasRefreshInterval="100">
+</ccwc-video>
+
+<script>
+    document.querySelector('ccwc-video').glFilterLibrary = {
+        diff: {
+            vertex: ccwc.image.webgl.shaders.passthrough.vertex,
+            fragment: document.getElementById('2d-fragment-shader').text
+        }
+    };
+</script>
+</body>
+</html>

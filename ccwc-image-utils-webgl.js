@@ -22,6 +22,11 @@ ccwc.image.webgl.filter = {
         if (!shaderloc) {
             shaderloc = ccwc.image.webgl.shaders;
         }
+        if (!shaderloc[name]) {
+            console.log('Shader ', name, 'not found in ', shaderloc, ' using a passthrough shader instead');
+            shaderloc = ccwc.image.webgl.shaders;
+            name = 'passthrough';
+        }
         var vtx = shaderloc[name].vertex;
         var frg = shaderloc[name].fragment;
         return this.createFilterFromShaders(vtx, frg);
@@ -124,11 +129,6 @@ ccwc.image.webgl.filter = {
                 glctx.pixelStorei(glctx.UNPACK_FLIP_Y_WEBGL, glprops.flipTexture);
                 glctx.texImage2D(glctx.TEXTURE_2D, 0, glctx.RGBA, glctx.RGBA, glctx.UNSIGNED_BYTE, glprops.textures[refreshTextureIndices[c]]);
             }
-
-            /*var resolutionLocationVertex = glctx.getUniformLocation(glprops.program, 'u_resolution');
-            var resolutionLocationFragment = glctx.getUniformLocation(glprops.program, 'f_resolution');
-            glctx.uniform2f(resolutionLocationVertex, glctx.canvas.width, glctx.canvas.height);
-            glctx.uniform2f(resolutionLocationFragment, glctx.canvas.width, glctx.canvas.height);*/
 
             glprops.uniforms.add('u_resolution', ccwc.image.webgl.uniforms.UNIFORM2f, [glctx.canvas.width, glctx.canvas.height]);
             glprops.uniforms.add('f_resolution', ccwc.image.webgl.uniforms.UNIFORM2f, [glctx.canvas.width, glctx.canvas.height]);
