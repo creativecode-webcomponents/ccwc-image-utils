@@ -39,7 +39,7 @@
 
         var glProps = ccwc.image.webgl.filter.createRenderObject({
             gl: canvas.getContext('webgl'),
-            filter: ccwc.image.webgl.filter.createFilterFromName(filters[parseInt(Math.random() * filters.length + 1)]),
+            filter: ccwc.image.webgl.filter.createFilterFromName(filters[parseInt(Math.random() * filters.length)]),
             textures: [{name: 'video', texture: document.querySelector('ccwc-video').videoElement}]
         });
 
