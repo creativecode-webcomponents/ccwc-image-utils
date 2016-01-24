@@ -24,7 +24,7 @@
             }
         </script>
 
-        <script src="../ccwc-image-utils-webgl.js" type="text/javascript"></script>
+        <script src="../webgl.js" type="text/javascript"></script>
 </head>
 <body>
 <p>
@@ -44,11 +44,11 @@
         img2.onload = function (e) {
             canvas.height = img.height;
             canvas.width = img.width;
-            glProps = ccwc.image.webgl.filter.createRenderObject({
+            glProps = ccwc.image.webgl.filters.createRenderObject({
                 gl: canvas.getContext('webgl'),
-                filter: ccwc.image.webgl.filter.createFilterFromShaders(ccwc.image.webgl.shaders.passthrough.vertex, document.getElementById('2d-fragment-shader').text),
+                filter: ccwc.image.webgl.filters.createFilterFromShaders(ccwc.image.webgl.shaders.passthrough.vertex, document.getElementById('2d-fragment-shader').text),
                 textures: [{name: 'imagea', texture: img}, {name: 'imageb', texture: img2}],
-                uniforms: [{name: 'u_tolerance', type: ccwc.image.webgl.uniforms.UNIFORM1f, values: [0.1]}],
+                uniforms: [{name: 'u_tolerance', type: ccwc.image.webgl.constants.uniforms.UNIFORM1f, values: [0.1]}],
                 autorender: true
             });
         }
@@ -56,7 +56,7 @@
 
     function onSliderChange(event) {
         glProps.uniforms.update('u_tolerance', [ event.target.value/100]);
-        ccwc.image.webgl.filter.render(glProps);
+        ccwc.image.webgl.filters.render(glProps);
     }
 </script>
 </body>

@@ -1,23 +1,42 @@
 var gulp = require('gulp');
 var gl2js = require('gulp-gl2js');
-var concat = require('gulp-concat');
+var sourcemaps = require("gulp-sourcemaps");
+var browserify = require('browserify');
+var babelify = require('babelify');
+var source = require('vinyl-source-stream');
 var runSequence = require('gulp-run-sequence');
 
-gulp.task('utils-canvas', function() {
-    return gulp.src(['src/canvas/*.js'])
-        .pipe(concat('ccwc-image-utils-canvas.js'))
+
+gulp.task('all', function () {
+    return browserify({
+        entries: 'src/all.es6',
+        standalone: 'ccwc',
+        extensions: ['es2015'], debug: true})
+        .transform(babelify)
+        .bundle()
+        .pipe(source('image.js'))
         .pipe(gulp.dest('./'));
 });
 
-gulp.task('utils-webgl', function() {
-    return gulp.src(['src/webgl/*.js'])
-        .pipe(concat('ccwc-image-utils-webgl.js'))
+gulp.task('canvas', function () {
+    return browserify({
+        entries: 'src/canvas.es6',
+        standalone: 'ccwc',
+        extensions: ['es2015'], debug: true})
+        .transform(babelify)
+        .bundle()
+        .pipe(source('canvas.js'))
         .pipe(gulp.dest('./'));
 });
 
-gulp.task('utils', function() {
-    return gulp.src(['src/webgl/*.js', 'src/canvas/*.js'])
-        .pipe(concat('ccwc-image-utils.js'))
+gulp.task('webgl', function () {
+    return browserify({
+        entries: 'src/webgl.es6',
+        standalone: 'ccwc',
+        extensions: ['es2015'], debug: true})
+        .transform(babelify)
+        .bundle()
+        .pipe(source('webgl.js'))
         .pipe(gulp.dest('./'));
 });
 
@@ -26,7 +45,7 @@ gulp.task('utils', function() {
  */
 gulp.task('shaders', function() {
    return gulp.src('./src/webgl/shaders/*.glsl')
-        .pipe(gl2js('shaders', { assignto: 'ccwc.image.webgl.shaders'} ))
+        .pipe(gl2js('shaders', { extension: 'es6', module: true } ))
         .pipe(gulp.dest('./src/webgl'));
 });
 
@@ -35,10 +54,10 @@ gulp.task('shaders', function() {
  */
 gulp.task('extra-shaders', function() {
     return gulp.src('./src/webgl-extra/extra-shaders/*.glsl')
-        .pipe(gl2js('extra-shaders', { assignto: 'var filters'} ))
+        .pipe(gl2js('extra-shaders', { extension: 'es6', module: true } ))
         .pipe(gulp.dest('./src/webgl-extra'));
 });
 
 gulp.task('default', function(cb) {
-    runSequence('shaders', 'extra-shaders', 'utils-canvas', 'utils-webgl', 'utils', cb);
+    runSequence('shaders', 'extra-shaders', 'canvas', 'webgl', 'all', cb);
 });

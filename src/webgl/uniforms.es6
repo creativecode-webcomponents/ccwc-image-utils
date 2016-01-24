@@ -1,21 +1,21 @@
-if (!window.ccwc) { ccwc = {}; }
-if (!window.ccwc.image) { ccwc.image = {}; }
-if (!window.ccwc.image) { ccwc.image = {}; }
-if (!window.ccwc.image.webgl) { ccwc.image.webgl = {}; }
-
-ccwc.image.webgl.uniforms = function() {
+export default class {
     /**
-     * internal mapping of uniforms
-     * @type {{}}
-     * @private
+     * c-tor
      */
-    this._uniforms = {};
+    constructor() {
+        /**
+         * internal mapping of uniforms
+         * @type {{}}
+         * @private
+         */
+        this._uniforms = {};
+    }
 
     /**
      * add a uniform
      * @param type type of uniform (1f, 2f, 3f, 4f, 1i, 2i, 3i, 4u
      */
-    this.add = function(name, type, values) {
+    add(name, type, values) {
         this._uniforms[name] = { name: name, type: type, values: values, dirty: true };
     };
 
@@ -23,7 +23,7 @@ ccwc.image.webgl.uniforms = function() {
      * update a uniform
      * @param type type of uniform (1f, 2f, 3f, 4f, 1i, 2i, 3i, 4u
      */
-    this.update = function(name, values) {
+    update(name, values) {
         this._uniforms[name].values = values;
         this._uniforms[name].dirty = true;
     };
@@ -34,7 +34,7 @@ ccwc.image.webgl.uniforms = function() {
      * @param gl WebGL context
      * @param program
      */
-    this.updateProgram = function(gl, program) {
+    updateProgram(gl, program) {
         for (var c in this._uniforms) {
             if (this._uniforms[c].dirty) {
                 var u = gl.getUniformLocation(program, this._uniforms[c].name);
@@ -74,15 +74,4 @@ ccwc.image.webgl.uniforms = function() {
             }
         }
     }
-
-};
-
-ccwc.image.webgl.uniforms.UNIFORM1f = '1f';
-ccwc.image.webgl.uniforms.UNIFORM2f = '2f';
-ccwc.image.webgl.uniforms.UNIFORM3f = '3f';
-ccwc.image.webgl.uniforms.UNIFORM4f = '4f';
-
-ccwc.image.webgl.uniforms.UNIFORM1i = '1i';
-ccwc.image.webgl.uniforms.UNIFORM2i = '2i';
-ccwc.image.webgl.uniforms.UNIFORM3i = '3i';
-ccwc.image.webgl.uniforms.UNIFORM4i = '4i';
+}

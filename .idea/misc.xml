@@ -10,10 +10,4 @@
     <ConfirmationsSetting value="0" id="Add" />
     <ConfirmationsSetting value="0" id="Remove" />
   </component>
-  <component name="ProjectPlainTextFileTypeManager">
-    <file url="file://$PROJECT_DIR$/src/extra-shaders.js" />
-    <file url="file://$PROJECT_DIR$/src/extra-shaders.json" />
-    <file url="file://$PROJECT_DIR$/src/shaders.js" />
-    <file url="file://$PROJECT_DIR$/src/shaders.json" />
-  </component>
 </project>

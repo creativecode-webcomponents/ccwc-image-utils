@@ -1,30 +1,32 @@
-if (!window.ccwc) { ccwc = {}; }
-if (!window.ccwc.image) { ccwc.image = {}; }
-if (!window.ccwc.image) { ccwc.image = {}; }
-if (!window.ccwc.image.webgl) { ccwc.image.webgl = {}; }
+export default class {
+    /**
+     * c-tor
+     * @param gl
+     * @param width
+     * @param height
+     */
+    constructor(gl, width, height) {
+        /** internal texture array */
+        this._textures = {};
 
-ccwc.image.webgl.textures = function(gl, width, height) {
+        /** width */
+        this.width = width;
 
-    /** internal texture array */
-    this._textures = {};
+        /** height */
+        this.height = height;
 
-    /** width */
-    this.width = width;
+        /** gl context */
+        this.gl = gl;
 
-    /** height */
-    this.height = height;
+        /** uninitialized textures */
+        this._unitialized = [];
 
-    /** gl context */
-    this.gl = gl;
+        /** dirty textures (needs updating) */
+        this._dirty = [];
 
-    /** uninitialized textures */
-    this._unitialized = [];
-
-    /** dirty textures (needs updating) */
-    this._dirty = [];
-
-    /** texture indices */
-    this.textureIndices = [];
+        /** texture indices */
+        this.textureIndices = [];
+    }
 
     /**
      * add a texture
@@ -33,7 +35,7 @@ ccwc.image.webgl.textures = function(gl, width, height) {
      * @param {Integer} glindex
      * @param {Array} pixelstore
      */
-    this.add = function(name, texture, glindex, pixelstore) {
+    add(name, texture, glindex, pixelstore) {
         if (!glindex) {
             glindex = 0;
             while (this.textureIndices.indexOf(glindex) !== -1) {
@@ -50,7 +52,7 @@ ccwc.image.webgl.textures = function(gl, width, height) {
             name: name,
             glindex: glindex,
             texture: texture,
-            gltexture: gl.createTexture(),
+            gltexture: this.gl.createTexture(),
             initialized: false,
             pixelStore: pixelstore,
             dirty: true };
@@ -63,7 +65,7 @@ ccwc.image.webgl.textures = function(gl, width, height) {
      * @param name name of texture
      * @param texture
      */
-    this.update = function(name, texture) {
+    update(name, texture) {
         if (texture) {
             this._textures[name].texture = texture;
         }
@@ -74,7 +76,7 @@ ccwc.image.webgl.textures = function(gl, width, height) {
     /**
      * refresh scene with updated textures
      */
-    this.refreshScene = function() {
+    refreshScene() {
         for (var c = 0; c < this._dirty.length; c++) {
             this.gl.activeTexture(this.gl['TEXTURE' + this._dirty[c].glindex]);
             this.gl.bindTexture(this.gl.TEXTURE_2D, this._dirty[c].gltexture);
@@ -87,7 +89,7 @@ ccwc.image.webgl.textures = function(gl, width, height) {
      * initialize new textures
      * @param program
      */
-    this.initializeNewTextures = function(program) {
+    initializeNewTextures(program) {
         if (this._unitialized.length === 0) { return; }
         var gl = this.gl;
         for (var c = 0; c < this._unitialized.length; c++) {
@@ -111,4 +113,4 @@ ccwc.image.webgl.textures = function(gl, width, height) {
         }
         this._unitialized = [];
     };
-};
+}

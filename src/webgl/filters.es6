@@ -1,15 +1,17 @@
-if (!window.ccwc) { ccwc = {}; }
-if (!window.ccwc.image) { ccwc.image = {}; }
-if (!window.ccwc.image.webgl) { ccwc.image.webgl = {}; }
+import Constants from './constants.es6';
+import Shaders from './shaders.es6';
+import Filters from './filters.es6';
+import Textures from './textures.es6';
+import Uniforms from './uniforms.es6';
 
-ccwc.image.webgl.filter = {
+export default {
     /**
      * create filter from shaders
      * @param vertexShader
      * @param fragmentShader
      * @returns {{vertexShader: *, fragmentShader: *}}
      */
-    createFilterFromShaders: function(vertexShader, fragmentShader) {
+    createFilterFromShaders(vertexShader, fragmentShader) {
         return { vertexShader: vertexShader, fragmentShader: fragmentShader };
     },
 
@@ -18,13 +20,13 @@ ccwc.image.webgl.filter = {
      * @param name
      * @param memory space/variable to pull shader from
      */
-    createFilterFromName: function(name, shaderloc) {
+    createFilterFromName(name, shaderloc) {
         if (!shaderloc) {
-            shaderloc = ccwc.image.webgl.shaders;
+            shaderloc = Shaders;
         }
         if (!shaderloc[name]) {
             console.log('Shader ', name, 'not found in ', shaderloc, ' using a passthrough shader instead');
-            shaderloc = ccwc.image.webgl.shaders;
+            shaderloc = Shaders;
             name = 'passthrough';
         }
         var vtx = shaderloc[name].vertex;
@@ -36,7 +38,7 @@ ccwc.image.webgl.filter = {
      * create object for render
      * @param {Object}params
      */
-    createRenderObject: function(params) {
+    createRenderObject(params) {
         var props = {};
 
         props.gl = params.gl;
@@ -47,15 +49,15 @@ ccwc.image.webgl.filter = {
         if (params.height) { props.height = params.height; }
 
         props.filter = params.filter;
-        props.textures = new ccwc.image.webgl.textures(props.width,props.height);
+        props.textures = new Textures(props.width,props.height);
 
         props.canvas2DHelper = document.createElement('canvas');
         props.canvas2DHelper.width = props.width;
         props.canvas2DHelper.height = props.height;
         props.canvas2DHelperContext = props.canvas2DHelper.getContext('2d');
 
-        props.uniforms = new ccwc.image.webgl.uniforms();
-        props.textures = new ccwc.image.webgl.textures(props.gl, props.width, props.height);
+        props.uniforms = new Uniforms();
+        props.textures = new Textures(props.gl, props.width, props.height);
 
         if (params.textures) {
             for (var c = 0; c < params.textures.length; c++) {
@@ -82,7 +84,7 @@ ccwc.image.webgl.filter = {
      * @param refreshTextureIndices texture refresh indices (optional)
      * @returns {*}
      */
-    render: function(glprops) {
+    render(glprops) {
         if (!glprops.isInitialized) {
             var vertexShader = glprops.gl.createShader(glprops.gl.VERTEX_SHADER);
             glprops.gl.shaderSource(vertexShader, glprops.filter.vertexShader);
@@ -112,8 +114,8 @@ ccwc.image.webgl.filter = {
             glprops.gl.enableVertexAttribArray(texCoordLocation);
             glprops.gl.vertexAttribPointer(texCoordLocation, 2, glprops.gl.FLOAT, false, 0, 0);
 
-            glprops.uniforms.add('u_resolution', ccwc.image.webgl.uniforms.UNIFORM2f, [glprops.gl.canvas.width, glprops.gl.canvas.height]);
-            glprops.uniforms.add('f_resolution', ccwc.image.webgl.uniforms.UNIFORM2f, [glprops.gl.canvas.width, glprops.gl.canvas.height]);
+            glprops.uniforms.add('u_resolution', Constants.uniforms.UNIFORM2f, [glprops.gl.canvas.width, glprops.gl.canvas.height]);
+            glprops.uniforms.add('f_resolution', Constants.uniforms.UNIFORM2f, [glprops.gl.canvas.width, glprops.gl.canvas.height]);
 
             glprops.gl.bindBuffer(glprops.gl.ARRAY_BUFFER, rectCoordBuffer);
             glprops.gl.enableVertexAttribArray(positionLocation);
@@ -135,7 +137,7 @@ ccwc.image.webgl.filter = {
      * read pixels from GL context
      * @param glProps
      */
-    getCanvasPixels: function(glprops) {
+    getCanvasPixels(glprops) {
         var glctx = glprops.gl;
         if (!glprops.pixelarray) {
             glprops.pixelarray = new Uint8Array(glctx.canvas.width * glctx.canvas.height * 4);
