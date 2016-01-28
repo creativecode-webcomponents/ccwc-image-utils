@@ -52,12 +52,22 @@ gulp.task('shaders', function() {
 /**
  * Extra shaders, more of a playground to test a bunch of them
  */
+gulp.task('extra-shaders-js', function() {
+    return gulp.src('./src/webgl-extra/extra-shaders/*.glsl')
+        .pipe(gl2js('extra-shaders', { assignto: 'var filters'} ))
+        .pipe(gulp.dest('./src/webgl-extra'));
+});
+
+/**
+ * Extra shaders, more of a playground to test a bunch of them
+ */
 gulp.task('extra-shaders', function() {
     return gulp.src('./src/webgl-extra/extra-shaders/*.glsl')
         .pipe(gl2js('extra-shaders', { extension: 'es6', module: true } ))
         .pipe(gulp.dest('./src/webgl-extra'));
 });
 
+
 gulp.task('default', function(cb) {
-    runSequence('shaders', 'extra-shaders', 'canvas', 'webgl', 'all', cb);
+    runSequence('shaders', 'extra-shaders', 'extra-shaders-js', 'canvas', 'webgl', 'all', cb);
 });
