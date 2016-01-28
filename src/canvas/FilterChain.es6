@@ -4,7 +4,7 @@ export default class {
     /**
      * c-tor
      */
-    constructor() {
+    constructor(pxs) {
         this.result = pxs;
     };
 
