@@ -15,6 +15,10 @@ export default {
             cfg = {};
         }
 
+        if (!cfg.minBlobSize) {
+            cfg.minBlobSize = this.MIN_BLOB_SIZE;
+        }
+
         var width = pxs.width;
         var rowsize = width * 4;
         var len = pxs.data.length;
@@ -111,7 +115,7 @@ export default {
         // refine blobs now that the right things are concated and we don't need to track
         // meaning we can start splicing things without worrying about the index
         blobs = blobs.filter(function (blb) {
-            return blb.length >= this.MIN_BLOB_SIZE;
+            return blb.length >= cfg.minBlobSize;
         }, this);
 
 
