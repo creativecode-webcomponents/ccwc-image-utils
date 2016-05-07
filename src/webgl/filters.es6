@@ -139,7 +139,7 @@ export default {
      */
     getCanvasPixels(glprops) {
         var glctx = glprops.gl;
-        if (!glprops.pixelarray) {
+        if (!glprops.pixelarray || glctx.canvas.width * glctx.canvas.height * 4 !== glprops.pixelarray.length) {
             glprops.pixelarray = new Uint8Array(glctx.canvas.width * glctx.canvas.height * 4);
         }
         glctx.readPixels(0, 0, glctx.canvas.width, glctx.canvas.height, glctx.RGBA, glctx.UNSIGNED_BYTE, glprops.pixelarray);
