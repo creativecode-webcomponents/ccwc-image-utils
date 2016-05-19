@@ -71,6 +71,12 @@ export default {
             }
         }
 
+        if (params.textureOffset) {
+            var offsetPercentX = params.textureOffset.x / props.width;
+            var offsetPercentY = params.textureOffset.y / props.height;
+            props.uniforms.add('offset', Constants.uniforms.UNIFORM2f, [offsetPercentX, offsetPercentY]);
+        }
+
         if (params.autorender) {
             return this.render(props);
         }
