@@ -3,8 +3,7 @@
 <head lang="en">
     <meta charset="UTF-8">
     <title>Video Camera Demo</title>
-    <link rel="import" href="../node_modules/ccwc-video/ccwc-video.html">
-    <script src="../ccwc-image-utils-canvas.js"></script>
+    <script type="module" src="../node_modules/ccwc-video/src/ccwc-video.js"></script>
 
     <style>
         ccwc-video {
@@ -23,12 +22,17 @@
 </ccwc-video>
 
 <br />
-<button onclick="capture(event)">Video Diff</button>
+<button>Video Diff</button>
 
 <br />
-<input type="range" value="90" min="0" max="100" step="1" id="tolerance" oninput="onSliderChange(event)">
+<input type="range" value="90" min="0" max="100" step="1" id="tolerance">
 
-<script>
+<script type="module">
+    import Filters from '../src/canvas/filters.js';
+
+    document.querySelector('button').addEventListener('click', capture);
+    document.querySelector('input').addEventListener('input', onSliderChange);
+
     var baselineimage = null;
     var lastframe = null;
     var tolerance = parseInt(document.querySelector('#tolerance').value);
@@ -36,7 +40,7 @@
         var data = event.detail;
         lastframe = data.framedata;
         if (baselineimage) {
-            data.canvascontext.putImageData(ccwc.image.canvas.filters.toDiff(data.framedata, baselineimage, tolerance), 0, 0, 0, 0, data.width, data.height );
+            data.canvascontext.putImageData(Filters.toDiff(data.framedata, baselineimage, tolerance), 0, 0, 0, 0, data.width, data.height );
         }
     });
 

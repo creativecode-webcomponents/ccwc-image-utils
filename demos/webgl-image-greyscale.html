@@ -4,8 +4,9 @@
         <title>WebGL Greyscale Filter</title>
     </head>
     <body>
-    <script src="../webgl.js" type="text/javascript"></script>
-    <script>
+    <script type="module">
+        import Filters from '../src/webgl/filters.js';
+
         var canvas = document.createElement('canvas');
         document.body.appendChild(canvas);
 
@@ -14,8 +15,8 @@
         img.onload = function() {
             canvas.height = img.height;
             canvas.width = img.width;
-            var glProps = ccwc.image.webgl.filters.createRenderObject({
-                filter: ccwc.image.webgl.filters.createFilterFromName('greyscale'),
+            var glProps = Filters.createRenderObject({
+                filter: Filters.createFilterFromName('greyscale'),
                 gl: canvas.getContext('webgl'),
                 textures: [{name: 'image', texture: img}],
                 autorender: true

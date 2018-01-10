@@ -3,9 +3,8 @@
 <head lang="en">
     <meta charset="UTF-8">
     <title>Video Playback Demo</title>
-    <link rel="import" href="../node_modules/ccwc-video/ccwc-video.html">
-    <script src="../ccwc-image-utils-canvas.js"></script>
-    
+    <script type="module" src="../node_modules/ccwc-video/src/ccwc-video.js"></script>
+
     <style>
         ccwc-video {
             width: 640px;
@@ -22,10 +21,12 @@
             useCanvasForDisplay>
     </ccwc-video>
 
-    <script>
+    <script type="module">
+        import Filters from '../src/canvas/filters.js';
+
         document.querySelector('ccwc-video').addEventListener('frameupdate', function(event) {
             var data = event.detail;
-            data.canvascontext.putImageData(ccwc.image.canvas.filters.toGrayscale(data.framedata), 0, 0, 0, 0, data.width, data.height );
+            data.canvascontext.putImageData(Filters.toGrayscale(data.framedata), 0, 0, 0, 0, data.width, data.height );
         });
     </script>
 </body>

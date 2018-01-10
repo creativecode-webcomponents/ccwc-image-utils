@@ -3,7 +3,6 @@
 <head lang="en">
     <meta charset="UTF-8">
     <title>Blobs from Baseline</title>
-    <script src="../canvas.js" type="text/javascript"></script>
 
     <style>
         canvas {
@@ -14,7 +13,10 @@
 
 <body>
 
-<script>
+<script type="module">
+    import Filters from '../src/canvas/filters.js';
+    import Blobs from '../src/canvas/blobs.js';
+
     var imagereducefactor = 8;
     var canvas = { baseline: document.createElement('canvas'), newframe: document.createElement('canvas'), result: document.createElement('canvas')};
     var ctx = { baseline: canvas.baseline.getContext('2d'), newframe: canvas.newframe.getContext('2d'), result: canvas.result.getContext('2d') };
@@ -36,8 +38,8 @@
             var baseline = ctx.baseline.getImageData(0, 0, this.naturalWidth / imagereducefactor, this.naturalHeight / imagereducefactor);
             var newframe = ctx.newframe.getImageData(0, 0, this.naturalWidth / imagereducefactor, this.naturalHeight / imagereducefactor);
 
-            var diff = ccwc.image.canvas.filters.toDiff(baseline, newframe, 25);
-            var blobs = ccwc.image.canvas.blobs.findBlobs(diff, {paint: true});
+            var diff = Filters.toDiff(baseline, newframe, 25);
+            var blobs = Blobs.findBlobs(diff, {paint: true});
             ctx.result.putImageData( blobs.image, 0, 0, 0, 0, this.naturalWidth / imagereducefactor, this.naturalHeight / imagereducefactor );
         }
     };

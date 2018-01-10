@@ -1,8 +1,8 @@
-import Constants from './constants.es6';
-import Shaders from './shaders.es6';
-import Filters from './filters.es6';
-import Textures from './textures.es6';
-import Uniforms from './uniforms.es6';
+import Constants from './constants.js';
+import Shaders from './shaders.js';
+import Filters from './filters.js';
+import Textures from './textures.js';
+import Uniforms from './uniforms.js';
 
 export default {
     /**

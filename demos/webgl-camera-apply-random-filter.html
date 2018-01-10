@@ -3,8 +3,7 @@
 <head>
     <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
     <title>Demo: Apply Filter</title>
-    <script src="../ccwc-image-utils-webgl.js"></script>
-    <link rel="import" href="../node_modules/ccwc-video/ccwc-video.html">
+    <script type="module" src="../node_modules/ccwc-video/src/ccwc-video.js"></script>
 
     <style>
         ccwc-video {
@@ -27,7 +26,9 @@
         canvasRefreshInterval="100">
 </ccwc-video>
 
-<script>
+<script type="module">
+    import Filter from '../src/webgl/filters.js';
+
     var filters = ['sepia', 'greyscale', 'passthrough', 'sobel_edge_detection', 'freichen_edge_detection'];
     var canvas = document.createElement('canvas');
     document.body.appendChild(canvas);
@@ -38,15 +39,15 @@
         canvas.width = event.detail.videoWidth;
         canvas.height = event.detail.videoHeight;
 
-        var glProps = ccwc.image.webgl.filter.createRenderObject({
+        var glProps = Filter.createRenderObject({
             gl: canvas.getContext('webgl'),
-            filter: ccwc.image.webgl.filter.createFilterFromName(filters[parseInt(Math.random() * filters.length)]),
+            filter: Filter.createFilterFromName(filters[parseInt(Math.random() * filters.length)]),
             textures: [{name: 'video', texture: document.querySelector('ccwc-video').videoElement}]
         });
 
         document.querySelector('ccwc-video').addEventListener('frameupdate', function(event) {
             glProps.textures.update('video');
-            ccwc.image.webgl.filter.render(glProps);
+            Filter.render(glProps);
         });
     });
 </script>

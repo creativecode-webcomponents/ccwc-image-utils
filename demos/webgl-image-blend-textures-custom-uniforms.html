@@ -16,15 +16,19 @@
                gl_FragColor = color0 * u_weight[0] + color1 * u_weight[1];
             }
         </script>
-
-        <script src="../webgl.js" type="text/javascript"></script>
     </head>
     <body>
     <p>
         Create a custom WebGL Uniform and attach it to the value of a slider for custom blend between two textures
     </p>
-    <input type="range" value="50" min="0" max="100" step="1" id="tolerance" oninput="onSliderChange(event)">
-        <script>
+    <input type="range" value="50" min="0" max="100" step="1" id="tolerance">
+        <script type="module">
+            import Filters from '../src/webgl/filters.js';
+            import Shaders from '../src/webgl/shaders.js';
+            import Constants from '../src/webgl/constants.js';
+
+            document.querySelector('input').addEventListener('input', onSliderChange);
+
             var canvas = document.createElement('canvas');
             var glProps;
             document.body.appendChild(canvas);
@@ -37,11 +41,11 @@
                 img2.onload = function (e) {
                     canvas.height = img.height;
                     canvas.width = img.width;
-                    glProps = ccwc.image.webgl.filters.createRenderObject({
+                    glProps = Filters.createRenderObject({
                         gl: canvas.getContext('webgl'),
-                        filter: ccwc.image.webgl.filters.createFilterFromShaders(ccwc.image.webgl.shaders.passthrough.vertex, document.getElementById('2d-fragment-shader').text),
+                        filter: Filters.createFilterFromShaders(Shaders.passthrough.vertex, document.getElementById('2d-fragment-shader').text),
                         textures: [{name: 'imagea', texture: img}, {name: 'imageb', texture: img2}],
-                        uniforms: [{name: 'u_weight', type: ccwc.image.webgl.constants.uniforms.UNIFORM2f, values: [0.5, 0.5]}],
+                        uniforms: [{name: 'u_weight', type: Constants.uniforms.UNIFORM2f, values: [0.5, 0.5]}],
                         autorender: true
                     });
                 }
@@ -49,7 +53,7 @@
 
             function onSliderChange(event) {
                 glProps.uniforms.update('u_weight', [ event.target.value/100, 1- event.target.value/100]);
-                ccwc.image.webgl.filters.render(glProps);
+                Filters.render(glProps);
             }
         </script>
     </body>

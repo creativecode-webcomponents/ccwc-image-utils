@@ -1,4 +1,4 @@
-import Filters from './filters.es6';
+import Filters from './filters.js';
 
 export default class {
     /**

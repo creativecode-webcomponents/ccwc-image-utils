@@ -61,9 +61,11 @@
     </script>
 </head>
 <body>
-<script src="../webgl.js" type="text/javascript"></script>
 
-<script>
+<script type="module">
+    import Filters from '../src/webgl/filters.js';
+    import Shaders from '../src/webgl/shaders.js';
+
     var canvas = document.createElement('canvas');
     document.body.appendChild(canvas);
 
@@ -72,10 +74,10 @@
     img.onload = function(e) {
         canvas.height = img.height;
         canvas.width = img.width;
-        var glProps = ccwc.image.webgl.filters.createRenderObject( {
+        var glProps = Filters.createRenderObject( {
             gl: canvas.getContext('webgl'),
             textures: [{name: 'image', texture: img}],
-            filter: ccwc.image.webgl.filters.createFilterFromShaders(ccwc.image.webgl.shaders.passthrough.vertex, document.getElementById('2d-fragment-shader').text),
+            filter: Filters.createFilterFromShaders(Shaders.passthrough.vertex, document.getElementById('2d-fragment-shader').text),
             autorender: true
         });
     };
