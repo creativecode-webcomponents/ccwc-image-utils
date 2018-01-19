@@ -4,5 +4,12 @@
   "devDependencies": {
     "gulp": "^3.9.0",
     "gulp-gl2js": "git://github.com/bengfarrell/gulp-gl2js.git"
+  },
+  "dependencies": {
+    "jsfeat": "0.0.8"
+  },
+  "scripts": {
+    "wrap-jsfeat": "node ./bin/wraplib.js node_modules/jsfeat/build/jsfeat.js jsfeat > ./src/jsfeat/jsfeat.wrapper.js",
+    "gl2js": "gulp"
   }
 }
