@@ -44,7 +44,7 @@ export default {
         return pxs;
     },
 
-    toFastCornerVisualization(pxs, threshold) {
+    fastCorners(pxs, threshold, donotvisualize) {
         if (!threshold) {
             threshold = 20;
         }
@@ -59,9 +59,11 @@ export default {
         JSFeat.imgproc.grayscale(pxs.data, pxs.width, pxs.height, img_u8);
 
         let count = JSFeat.fast_corners.detect(img_u8, corners, 5);
-        let data_u32 = new Uint32Array(pxs.data.buffer);
-        this._render_corners(corners, count, data_u32, pxs.width);
-        return pxs;
+        if (!donotvisualize) {
+            let data_u32 = new Uint32Array(pxs.data.buffer);
+            Filters._render_corners(corners, count, data_u32, pxs.width);
+        }
+        return {image: pxs, points: corners};
     },
 
     _applyMatrixToImage(mat, image) {

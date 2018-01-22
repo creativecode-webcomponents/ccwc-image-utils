@@ -36,7 +36,7 @@
         var starttime = new Date().getTime();
         ctx.drawImage(img, 0, 0, width, height);
         var imgPixels = ctx.getImageData(0, 0, width, height);
-        ctx.putImageData( Filters.toFastCornerVisualization(imgPixels, tolerance), 0, 0, 0, 0, width, height );
+        ctx.putImageData( Filters.fastCorners(imgPixels, tolerance).image, 0, 0, 0, 0, width, height );
         var endtime = new Date().getTime();
         console.log((endtime-starttime)/1000 + ' seconds');
     }
