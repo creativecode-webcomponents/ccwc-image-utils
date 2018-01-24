@@ -44,6 +44,18 @@ export default {
         return pxs;
     },
 
+    toBoxBlurGray(pxs, radius) {
+        if (!radius) {
+            radius = 10;
+        }
+
+        let img_u8 = new JSFeat.matrix_t(pxs.width, pxs.height, JSFeat.U8_t | JSFeat.C1_t);
+        JSFeat.imgproc.grayscale(pxs.data, pxs.width, pxs.height, img_u8);
+        JSFeat.imgproc.box_blur_gray(img_u8, img_u8, radius, 0);
+        Filters._applyMatrixToImage(img_u8, pxs);
+        return pxs;
+    },
+
     fastCornersViz(pxs, threshold) {
         if (!threshold) {
             threshold = 20;
