@@ -1,5 +1,6 @@
 import JSFeat from './jsfeat.wrapper.js';
 import Filters from './filters.js';
+import Detection from './detection.js';
 
 export default {
     /**
@@ -56,47 +57,11 @@ export default {
         return pxs;
     },
 
-    fastCornersViz(pxs, threshold) {
-        if (!threshold) {
-            threshold = 20;
+    toFeatureVisualization(pxs, params) {
+        if (!params) {
+            params = Detection.DEFAULT_FAST_DETECTOR_OPTIONS;
         }
-        let img_u8 = new JSFeat.matrix_t(pxs.width, pxs.height, JSFeat.U8_t | JSFeat.C1_t);
-        let corners = [];
-        let i = pxs.width * pxs.height;
-        while (--i >= 0) {
-            corners[i] = new JSFeat.keypoint_t(0, 0, 0, 0);
-        }
-
-        JSFeat.fast_corners.set_threshold(threshold);
-        JSFeat.imgproc.grayscale(pxs.data, pxs.width, pxs.height, img_u8);
-
-        let count = JSFeat.fast_corners.detect(img_u8, corners, 5);
-        let data_u32 = new Uint32Array(pxs.data.buffer);
-        Filters._render_corners(corners, count, data_u32, pxs.width);
-        return pxs;
-    },
-
-    getFastCorners(pxs, threshold, viz) {
-        if (!threshold) {
-            threshold = 20;
-        }
-        let img_u8 = new JSFeat.matrix_t(pxs.width, pxs.height, JSFeat.U8_t | JSFeat.C1_t);
-        let corners = [];
-        let i = pxs.width * pxs.height;
-        while (--i >= 0) {
-            corners[i] = new JSFeat.keypoint_t(0, 0, 0, 0);
-        }
-
-        JSFeat.fast_corners.set_threshold(threshold);
-        JSFeat.imgproc.grayscale(pxs.data, pxs.width, pxs.height, img_u8);
-
-        let count = JSFeat.fast_corners.detect(img_u8, corners, 5);
-        let data_u32 = new Uint32Array(pxs.data.buffer);
-
-        if (viz) {
-            Filters._render_corners(corners, count, data_u32, pxs.width);
-        }
-        return { image: pxs, points: corners.splice(0, count) };
+        return Detection.ProcessFeatures(pxs, params).image;
     },
 
     _applyMatrixToImage(mat, image) {
@@ -128,20 +93,6 @@ export default {
             gy = Math.abs(mat.data[(i<<1)+1]>>2)&0xff;
             pix = ((gx + gy)>>1)&0xff;
             data_u32[i] = (pix << 24) | (gx << 16) | (0 << 8) | gy;
-        }
-    },
-
-    _render_corners(corners, count, img, step) {
-        let pix = (0xff << 24) | (0x00 << 16) | (0xff << 8) | 0x00;
-        for (let i = 0; i < count; ++i) {
-            let x = corners[i].x;
-            let y = corners[i].y;
-            let off = (x + y * step);
-            img[off] = pix;
-            img[off - 1] = pix;
-            img[off + 1] = pix;
-            img[off - step] = pix;
-            img[off + step] = pix;
         }
     }
 }

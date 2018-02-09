@@ -1,5 +1,4 @@
 import Blobs from './canvas/blobs.js';
-import FilterChain from './canvas/FilterChain.js';
 import CanvasFilters from './canvas/filters.js';
 import WebGLFilters from './webgl/filters.js';
 import Shaders from './webgl/shaders.js';
@@ -10,7 +9,6 @@ import Constants from './webgl/constants.js';
 exports.image = {
     canvas: {
         blobs: Blobs,
-        filterchain: FilterChain,
         filters: CanvasFilters
     },
     webgl: {

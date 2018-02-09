@@ -1,4 +1,5 @@
-import Filters from './filters.js';
+import JSFeatFilters from './jsfeat/filters.js';
+import Filters from './canvas/filters.js';
 
 export default class {
     /**
@@ -7,6 +8,57 @@ export default class {
     constructor(pxs) {
         this.result = pxs;
     };
+
+    /**
+     * convert image to grayscale
+     * @param {ImageData} pxs
+     * @returns {*}
+     */
+    toJSFeatGrayscale() {
+        this.result = JSFeatFilters.toGrayscale(this.result);
+        return this;
+    };
+
+    /**
+     * to sobel derivative
+     * @param {ImageData} pxs
+     * @returns {*}
+     */
+    toSobelDerivative() {
+        this.result = JSFeatFilters.toSobelDerivative(this.result);
+        return this;
+    };
+
+    /**
+     * to pyrdown
+     * @param pxs
+     * @returns {*}
+     */
+    toPyrdown() {
+        this.result = JSFeatFilters.toPyrdown(this.result);
+        return this;
+    };
+
+    /**
+     * to box blur gray
+     * @param radius
+     * @returns {*}
+     */
+    toBoxBlurGray(radius) {
+        this.result = JSFeatFilters.toBoxBlurGray(this.result, radius);
+        return this;
+    }
+
+    /**
+     * visualize fast corners
+     * @param threshold
+     * @returns {*}
+     */
+    features(params) {
+        this.result = JSFeatFilters.fastCorners(this.result, params);
+        return this;
+    }
+
 
     /**
      * convert image to grayscale
