@@ -48,10 +48,26 @@ export default class {
             max_iterations: 30,
             epsilon: 0.01,
             min_eigen: 0.001,
-            maxTrackingPoints: 50,
+            maxTrackingPoints: 1000,
             visualize: true,
             visualizeColor: 'red'
         };
+    }
+
+    static get DEFAULT_MOTION_ESTIMATION_OPTIONS() {
+        return {
+            active: true,
+            framesPerSession: 50, // number of frames captured before resetting optical flow points
+            model_size: 4, // minimum points to estimate motion
+            thresh: 150, // max error to classify as inlier
+            eps: 0.5, // max outliers ratio
+            prob: 0.9, // probability of success
+            max_iters: 1000,
+            max_distance: 50, // max pixel distance before considering bad
+            visualize: true,
+            visualizeColor: 'yellow',
+            visualizeLookBack: 10
+        }
     }
 
     static ProcessFeatures(pxs, params) {
@@ -94,7 +110,7 @@ export default class {
             let data_u32 = new Uint32Array(pxs.data.buffer);
             Detection._render_corners(corners, count, data_u32, pxs.width);
         }
-        return {image: pxs, features: features };
+        return {image: pxs, features: features, numFeatures: count };
     }
 
     static _render_corners(corners, count, img, step) {
@@ -115,15 +131,24 @@ export default class {
     get opticalFlowOptions() { return this._opticalFlowOptions; }
     set featureDetectOptions(opt) { this._featureDetectOptions = opt; }
     get featureDetectOptions() { return this._featureDetectOptions };
+    set motionEstimatorOptions(opt) { this._motionEstimatorOptions = opt; }
+    get motionEstimatorOptions() { return this._motionEstimatorOptions };
 
     constructor(ctx) {
         this.canvasContext = ctx;
         this.opticalFlowOptions = Detection.DEFAULT_OPTICAL_FLOW_OPTIONS;
         this.featureDetectOptions = Detection.DEFAULT_YAPE06_DETECTOR_OPTIONS;
+        this.motionEstimatorOptions = Detection.DEFAULT_MOTION_ESTIMATION_OPTIONS;
+
+        this._motionFrames = [];
     }
 
     set context(ctx) {
         this.canvasContext = ctx;
+    }
+
+    get numFlowPoints() {
+        return this._pointsCount;
     }
 
     addFlowPoint(x, y) {
@@ -132,9 +157,22 @@ export default class {
         this._pointsCount ++;
     }
 
+    autoAddFlowPoints(pxs) {
+        let feats = Detection.ProcessFeatures(pxs, this.featureDetectOptions);
+        for (let c = 0; c < feats.numFeatures; c++) {
+            this.addFlowPoint(feats.features[c].x, feats.features[c].y);
+        }
+    }
+
     updateFlow(pxs) {
         if (!this._flowInitialized) {
             this._flowInitialize(pxs);
+        }
+
+        if (this.motionEstimatorOptions.active && (this.numFlowPoints === 0 || this._motionFrames.length >= this.motionEstimatorOptions.framesPerSession)) {
+            this._motionFrames = [];
+            this._pointsCount = 0;
+            this.autoAddFlowPoints(pxs);
         }
 
         // swap flow data
@@ -158,19 +196,83 @@ export default class {
             this.opticalFlowOptions.win_size, this.opticalFlowOptions.max_iterations,
             this._pointstatus, this.opticalFlowOptions.epsilon, this.opticalFlowOptions.min_eigen);
         this._prune_oflow_points();
+        let curr = this._convertBufferToCoords(this._currentPoints, this._pointsCount);
+        let goodpts = 0;
 
-        let out = [];
-        for (let c = 0; c < this._pointsCount*2; c+=2) {
-            out.push({ x: this._currentPoints[c], y: this._currentPoints[c+1]});
+        // run ransac for motion estimation
+        if (this.motionEstimatorOptions.active) {
+            let prev = this._convertBufferToCoords(this._previousPoints, this._pointsCount);
+
+            let ok = this._ransac(this._ransacParams, this._ransacHomo_kernel, prev, curr, this._pointsCount, this._ransacTransform, this._ransacMask, this.motionEstimatorOptions.max_iters);
+            if (ok && this._pointsCount > 15) {
+                for (let d = 0; d < this._pointsCount; d++) {
+                    if (this._ransacMask.data[d]) {
+                        prev[goodpts].x = prev[d].x;
+                        prev[goodpts].y = prev[d].y;
+                        curr[goodpts].x = curr[d].x;
+                        curr[goodpts].y = curr[d].y;
+                        goodpts++;
+                    }
+                }
+            }
+        } else {
+            goodpts = this._pointsCount;
+        }
+
+        for (let c = 0; c < goodpts; c++) {
             if (this.opticalFlowOptions.visualize) {
                 this.canvasContext.fillStyle = this.opticalFlowOptions.visualizeColor;
                 this.canvasContext.beginPath();
-                this.canvasContext.arc(this._currentPoints[c], this._currentPoints[c+1], 4, 0, Math.PI*2, true);
+                this.canvasContext.arc(curr[c].x, curr[c].y, 2, 0, Math.PI*2, true);
                 this.canvasContext.closePath();
                 this.canvasContext.fill();
             }
         }
-        return out;
+
+        let motionframe = curr.slice(0, goodpts);
+
+        // if motion estimation is active, set points equal to previous that traveled too obviously far from previous frame
+        if (this.motionEstimatorOptions.active) {
+            if (this._lastMotionFrame) {
+                for (let c = 0; c < this._lastMotionFrame.length; c++) {
+                    if (motionframe[c] && this._lastMotionFrame[c]) {
+                        let dx = motionframe[c].x - this._lastMotionFrame[c].x;
+                        let dy = motionframe[c].y - this._lastMotionFrame[c].y;
+                        let dist = Math.sqrt(dx * dx + dy * dy);
+                        if (dist > this.motionEstimatorOptions.max_distance) {
+                            motionframe[c].x = this._lastMotionFrame[c].x;
+                            motionframe[c].y = this._lastMotionFrame[c].y;
+                        }
+                    }
+                }
+            }
+            this._lastMotionFrame = motionframe;
+            this._motionFrames.push(motionframe);
+
+            if (this.motionEstimatorOptions.visualize) {
+                let start = this._motionFrames.length - this.motionEstimatorOptions.visualizeLookBack;
+                if (start < 0) {
+                    start = 0;
+                }
+                for (let d = start; d < this._motionFrames.length; d++) {
+                    if (this._motionFrames[d] && this._motionFrames[d - 1]) {
+                        for (let e = 0; e < this._motionFrames[d].length; e++) {
+                            if (d > 0) {
+                                this.canvasContext.strokeStyle = 'yellow';
+                                this.canvasContext.beginPath();
+
+                                if (this._motionFrames[d - 1][e] && this._motionFrames[d][e]) {
+                                    this.canvasContext.moveTo(this._motionFrames[d - 1][e].x, this._motionFrames[d - 1][e].y);
+                                    this.canvasContext.lineTo(this._motionFrames[d][e].x, this._motionFrames[d][e].y);
+                                    this.canvasContext.stroke();
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return motionframe;
     }
 
     updateFeatures(pxs) {
@@ -183,11 +285,25 @@ export default class {
         this._previousPyramid = new JSFeat.pyramid_t(3);
         this._previousPyramid.allocate(pxs.width, pxs.height, JSFeat.U8_t | JSFeat.C1_t);
         this._pointsCount = 0;
-        this._currentPoints = new Uint8Array(this.opticalFlowOptions.maxTrackingPoints);
         this._previousPoints = new Float32Array(this.opticalFlowOptions.maxTrackingPoints*2);
         this._currentPoints = new Float32Array(this.opticalFlowOptions.maxTrackingPoints*2);
         this._pointstatus = new Uint8Array(this.opticalFlowOptions.maxTrackingPoints);
         this._flowInitialized = true;
+
+        this._ransac = JSFeat.motion_estimator.ransac;
+        this._ransacHomo_kernel = new JSFeat.motion_model.homography2d();
+        this._ransacTransform = new JSFeat.matrix_t(3, 3, JSFeat.F32_t | JSFeat.C1_t);
+
+        this._ransacMask = new JSFeat.matrix_t(this.opticalFlowOptions.maxTrackingPoints, 1, JSFeat.U8_t | JSFeat.C1_t);
+        this._ransacParams = new JSFeat.ransac_params_t(this.motionEstimatorOptions.model_size, this.motionEstimatorOptions.thresh, this.motionEstimatorOptions.eps, this.motionEstimatorOptions.prob);
+    }
+
+    _convertBufferToCoords(buffer, count) {
+        let coords = [];
+        for (let c = 0; c < count*2; c+=2) {
+            coords.push({ x: buffer[c], y: buffer[c+1] });
+        }
+        return coords;
     }
 
     _prune_oflow_points(params) {
