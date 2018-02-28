@@ -57,7 +57,7 @@ export default class {
     static get DEFAULT_MOTION_ESTIMATION_OPTIONS() {
         return {
             active: true,
-            framesPerSession: 50, // number of frames captured before resetting optical flow points
+            framesPerSession: 200000000, // number of frames captured before resetting optical flow points
             model_size: 4, // minimum points to estimate motion
             thresh: 150, // max error to classify as inlier
             eps: 0.5, // max outliers ratio
