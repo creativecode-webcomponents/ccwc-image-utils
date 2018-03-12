@@ -57,13 +57,13 @@ export default class {
     static get DEFAULT_MOTION_ESTIMATION_OPTIONS() {
         return {
             active: true,
-            framesPerSession: 200000000, // number of frames captured before resetting optical flow points
+            useRansac: true,
+            framesPerSession: 500000000, // number of frames captured before resetting optical flow points
             model_size: 4, // minimum points to estimate motion
             thresh: 150, // max error to classify as inlier
             eps: 0.5, // max outliers ratio
             prob: 0.9, // probability of success
             max_iters: 1000,
-            max_distance: 50, // max pixel distance before considering bad
             visualize: true,
             visualizeColor: 'yellow',
             visualizeLookBack: 10
@@ -100,8 +100,8 @@ export default class {
                 break;
         }
 
+        JSFeat.math.qsort(corners, 0, count-1, function(a,b){return (b.score<a.score);});
         if(count > params.maxCorners) {
-            JSFeat.math.qsort(corners, 0, count-1, function(a,b){return (b.score<a.score);});
             count = params.maxCorners;
         }
 
@@ -195,31 +195,22 @@ export default class {
             this._pointsCount,
             this.opticalFlowOptions.win_size, this.opticalFlowOptions.max_iterations,
             this._pointstatus, this.opticalFlowOptions.epsilon, this.opticalFlowOptions.min_eigen);
-        this._prune_oflow_points();
-        let curr = this._convertBufferToCoords(this._currentPoints, this._pointsCount);
-        let goodpts = 0;
+
+        let curr = this._convertBufferToCoords(this._currentPoints, this._pointsCount, this._pointstatus);
 
         // run ransac for motion estimation
-        if (this.motionEstimatorOptions.active) {
+        if (this.motionEstimatorOptions.active && this.motionEstimatorOptions.useRansac) {
             let prev = this._convertBufferToCoords(this._previousPoints, this._pointsCount);
 
             let ok = this._ransac(this._ransacParams, this._ransacHomo_kernel, prev, curr, this._pointsCount, this._ransacTransform, this._ransacMask, this.motionEstimatorOptions.max_iters);
-            if (ok && this._pointsCount > 15) {
-                for (let d = 0; d < this._pointsCount; d++) {
-                    if (this._ransacMask.data[d]) {
-                        prev[goodpts].x = prev[d].x;
-                        prev[goodpts].y = prev[d].y;
-                        curr[goodpts].x = curr[d].x;
-                        curr[goodpts].y = curr[d].y;
-                        goodpts++;
-                    }
+            if (ok && curr.length > 15) {
+                for (let d = 0; d < curr.length; d++) {
+                    curr[d].active = curr[d].active && Boolean(this._ransacMask.data[d]);
                 }
             }
-        } else {
-            goodpts = this._pointsCount;
         }
 
-        for (let c = 0; c < goodpts; c++) {
+        for (let c = 0; c < curr.length; c++) {
             if (this.opticalFlowOptions.visualize) {
                 this.canvasContext.fillStyle = this.opticalFlowOptions.visualizeColor;
                 this.canvasContext.beginPath();
@@ -229,23 +220,10 @@ export default class {
             }
         }
 
-        let motionframe = curr.slice(0, goodpts);
+        let motionframe = curr.slice();
 
         // if motion estimation is active, set points equal to previous that traveled too obviously far from previous frame
         if (this.motionEstimatorOptions.active) {
-            if (this._lastMotionFrame) {
-                for (let c = 0; c < this._lastMotionFrame.length; c++) {
-                    if (motionframe[c] && this._lastMotionFrame[c]) {
-                        let dx = motionframe[c].x - this._lastMotionFrame[c].x;
-                        let dy = motionframe[c].y - this._lastMotionFrame[c].y;
-                        let dist = Math.sqrt(dx * dx + dy * dy);
-                        if (dist > this.motionEstimatorOptions.max_distance) {
-                            motionframe[c].x = this._lastMotionFrame[c].x;
-                            motionframe[c].y = this._lastMotionFrame[c].y;
-                        }
-                    }
-                }
-            }
             this._lastMotionFrame = motionframe;
             this._motionFrames.push(motionframe);
 
@@ -255,13 +233,17 @@ export default class {
                     start = 0;
                 }
                 for (let d = start; d < this._motionFrames.length; d++) {
-                    if (this._motionFrames[d] && this._motionFrames[d - 1]) {
+                    if (this._motionFrames[d] &&
+                        this._motionFrames[d - 1]) {
                         for (let e = 0; e < this._motionFrames[d].length; e++) {
                             if (d > 0) {
                                 this.canvasContext.strokeStyle = 'yellow';
                                 this.canvasContext.beginPath();
 
-                                if (this._motionFrames[d - 1][e] && this._motionFrames[d][e]) {
+                                if (this._motionFrames[d - 1][e] &&
+                                    this._motionFrames[d][e] &&
+                                    this._motionFrames[d][e].active &&
+                                    this._motionFrames[d - 1][e].active ) {
                                     this.canvasContext.moveTo(this._motionFrames[d - 1][e].x, this._motionFrames[d - 1][e].y);
                                     this.canvasContext.lineTo(this._motionFrames[d][e].x, this._motionFrames[d][e].y);
                                     this.canvasContext.stroke();
@@ -298,27 +280,17 @@ export default class {
         this._ransacParams = new JSFeat.ransac_params_t(this.motionEstimatorOptions.model_size, this.motionEstimatorOptions.thresh, this.motionEstimatorOptions.eps, this.motionEstimatorOptions.prob);
     }
 
-    _convertBufferToCoords(buffer, count) {
+    _convertBufferToCoords(buffer, count, status) {
         let coords = [];
         for (let c = 0; c < count*2; c+=2) {
-            coords.push({ x: buffer[c], y: buffer[c+1] });
+            let coord = { x: buffer[c], y: buffer[c+1] };
+            if (status && status[c]) {
+                coord.active = true;
+            } else {
+                coord.active = false;
+            }
+            coords.push(coord);
         }
         return coords;
-    }
-
-    _prune_oflow_points(params) {
-        let n = this._pointsCount;
-        let i=0,j=0;
-
-        for(; i < n; ++i) {
-            if(this._pointstatus[i] == 1) {
-                if(j < i) {
-                    this._currentPoints[j<<1] = this._currentPoints[i<<1];
-                    this._currentPoints[(j<<1)+1] = this._currentPoints[(i<<1)+1];
-                }
-                ++j;
-            }
-        }
-        this._pointsCount = j;
     }
 }
