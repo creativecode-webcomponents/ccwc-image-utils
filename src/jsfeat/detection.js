@@ -57,6 +57,7 @@ export default class {
     static get DEFAULT_MOTION_ESTIMATION_OPTIONS() {
         return {
             active: true,
+            autoFlowPoints: false,
             useRansac: true,
             framesPerSession: 500000000, // number of frames captured before resetting optical flow points
             model_size: 4, // minimum points to estimate motion
@@ -169,7 +170,9 @@ export default class {
             this._flowInitialize(pxs);
         }
 
-        if (this.motionEstimatorOptions.active && (this.numFlowPoints === 0 || this._motionFrames.length >= this.motionEstimatorOptions.framesPerSession)) {
+        // auto generate flow points by feature detection if active or we're starting over because X number of frames were captured
+        if (this.motionEstimatorOptions.active && this.motionEstimatorOptions.autoFlowPoints &&
+            (this.numFlowPoints === 0 || this._motionFrames.length >= this.motionEstimatorOptions.framesPerSession)) {
             this._motionFrames = [];
             this._pointsCount = 0;
             this.autoAddFlowPoints(pxs);
